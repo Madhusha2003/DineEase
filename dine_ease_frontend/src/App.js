@@ -6,6 +6,7 @@ import Sidebar from "./components/sideBar";
 
 
 import CustomerMenu from "./pages/customerMenu";
+import WaiterOrders from './pages/waiterOrders';
 
 function App() {
   return (
@@ -15,7 +16,7 @@ function App() {
          <div className="flex-1 p-6">
           <Routes>
             <Route path="/menu" element={<CustomerMenu/>} />
-            <Route path="/orders" element={<h1>📋 Orders Page</h1>} />
+            <Route path="/orders" element={<WaiterOrders/>} />
             <Route path="/reports" element={<h1>📊 Reports Page</h1>} />
             <Route path="/notifications" element={<h1>🔔 Notifications Page</h1>} />
             <Route path="/profile" element={<h1>👤 Profile Page</h1>} />
