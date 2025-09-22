@@ -3,20 +3,23 @@ import MenuCard from "../components/menuCard";
 
 export default function CustomerMenu() {
   const [search, setSearch] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("all");
   const [cart, setCart] = useState([]);
 
   const menuItems = [
-    { id: 1, image: "https://p7.hiclipart.com/preview/309/54/466/menu-food-computer-icons-lunch-dish-vector.jpg", title: "Whole Bread", price: 40 },
-    { id: 2, image: "https://p7.hiclipart.com/preview/309/54/466/menu-food-computer-icons-lunch-dish-vector.jpg", title: "Pastry Delight", price: 40 },
-    { id: 3, image: "https://p7.hiclipart.com/preview/309/54/466/menu-food-computer-icons-lunch-dish-vector.jpg", title: "French Baguette", price: 40 },
-    { id: 4, image: "https://p7.hiclipart.com/preview/309/54/466/menu-food-computer-icons-lunch-dish-vector.jpg", title: "Cake Slice", price: 40 },
-    { id: 5, image: "https://p7.hiclipart.com/preview/309/54/466/menu-food-computer-icons-lunch-dish-vector.jpg", title: "Mini Pizza", price: 40 },
-    { id: 6, image: "https://p7.hiclipart.com/preview/309/54/466/menu-food-computer-icons-lunch-dish-vector.jpg", title: "Sesame Bun", price: 40 },
+    { id: 1, image: "https://p7.hiclipart.com/preview/309/54/466/menu-food-computer-icons-lunch-dish-vector.jpg", title: "Whole Bread", price: 40, category: "food" },
+    { id: 2, image: "https://p7.hiclipart.com/preview/309/54/466/menu-food-computer-icons-lunch-dish-vector.jpg", title: "Pastry Delight", price: 40, category: "food" },
+    { id: 3, image: "https://p7.hiclipart.com/preview/309/54/466/menu-food-computer-icons-lunch-dish-vector.jpg", title: "French Baguette", price: 40, category: "food" },
+    { id: 4, image: "https://p7.hiclipart.com/preview/309/54/466/menu-food-computer-icons-lunch-dish-vector.jpg", title: "Cake Slice", price: 40, category: "food" },
+    { id: 5, image: "https://p7.hiclipart.com/preview/309/54/466/menu-food-computer-icons-lunch-dish-vector.jpg", title: "Mini Pizza", price: 40, category: "food" },
+    { id: 6, image: "https://p7.hiclipart.com/preview/309/54/466/menu-food-computer-icons-lunch-dish-vector.jpg", title: "Sesame Bun", price: 40, category: "food" },
   ];
 
-  const filteredItems = menuItems.filter(item =>
-    item.title.toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredItems = menuItems.filter(item => {
+    const matchesSearch = item.title.toLowerCase().includes(search.toLowerCase());
+    const matchesCategory = selectedCategory === "all" || item.category === selectedCategory;
+    return matchesSearch && matchesCategory;
+  });
   // cart function
   function addToCart(item) {
     // copy of current cart
@@ -61,16 +64,35 @@ export default function CustomerMenu() {
           </h2>
         </div>
 
-        {/* Search */}
-        <input
-          type="text"
-          placeholder="Search..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="w-1/2 p-2 border rounded-lg mb-6"
-        />
+        {/* Category Selector + Search */}
+        <div className="flex items-center gap-4 mb-6">
+          {/* Category Selector (pill buttons) */}
+          <div className="flex gap-2">
+            {["All", "Drinks", "Food", "Dessert"].map((cat) => (
+              <button
+                key={cat}
+                onClick={() => setSelectedCategory(cat.toLowerCase())}
+                className={`px-4 py-1 rounded-full border 
+          ${selectedCategory === cat.toLowerCase()
+                    ? "bg-orange-600 text-white"
+                    : "bg-white text-gray-700 border-gray-300 hover:bg-gray-100"}`}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
 
-        {/* Menu + Checkout side by side */}
+          {/* Search Bar */}
+          <input
+            type="text"
+            placeholder="Search menu..."
+            className="flex-1 border border-gray-300 rounded-lg p-2"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
+
+        {/* Menu  */}
         <div className="flex gap-6">
           {/* Menu Grid */}
           <div className="flex-1 grid md:grid-cols-3 lg:grid-cols-5 gap-5">
@@ -85,6 +107,7 @@ export default function CustomerMenu() {
               />
             ))}
           </div>
+
 
           {/* Checkout Section */}
           <div className="lg:w-100 md:w-90 min-w-[350px] bg-gray-100 p-6 rounded-lg shadow-md">
