@@ -87,11 +87,11 @@ export default function CustomerMenu() {
           </div>
 
           {/* Checkout Section */}
-          <div className="lg:w-auto md:w-auto bg-gray-100 p-6 rounded-lg shadow-md">
+          <div className="lg:w-100 md:w-90 min-w-[350px] bg-gray-100 p-6 rounded-lg shadow-md">
             <h2 className="text-2xl font-bold mb-4">Checkout</h2>
 
             {cart.length === 0 ? (
-              <p className="text-gray-500">Cart is empty</p>
+              <p className="text-gray-500 ">Cart is empty</p>
             ) : (
               <div className="space-y-2">
                 {cart.map(item => (
