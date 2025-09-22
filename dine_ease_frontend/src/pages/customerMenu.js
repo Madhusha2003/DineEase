@@ -28,7 +28,7 @@ export default function CustomerMenu() {
     let found = false;
     // check item is already in the cart
     for (let i = 0; i < newCart.length; i++) {
-      if (newCart[i].id == item.id) {
+      if (newCart[i].id === item.id) {
         newCart[i].quantity += 1;
         found = true;
         break;
@@ -44,12 +44,12 @@ export default function CustomerMenu() {
   };
   function increaseQty(id) {
     setCart(cart.map(item =>
-      item.id == id ? { ...item, quantity: item.quantity + 1 } : item
+      item.id === id ? { ...item, quantity: item.quantity + 1 } : item
     ));
   }
   function decreaseQty(id) {
     setCart(cart.map(item =>
-      item.id == id ? { ...item, quantity: Math.max(item.quantity - 1, 1) } : item
+      item.id === id ? { ...item, quantity: Math.max(item.quantity - 1, 1) } : item
     ));
   }
   return (
