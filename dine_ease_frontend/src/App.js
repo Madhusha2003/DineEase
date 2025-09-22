@@ -7,6 +7,7 @@ import Sidebar from "./components/sideBar";
 
 import CustomerMenu from "./pages/customerMenu";
 import WaiterOrders from './pages/waiterOrders';
+import KitchenDisplay from "./pages/kitchenDisplay";
 
 function App() {
   return (
@@ -18,7 +19,7 @@ function App() {
             <Route path="/menu" element={<CustomerMenu/>} />
             <Route path="/orders" element={<WaiterOrders/>} />
             <Route path="/reports" element={<h1>📊 Reports Page</h1>} />
-            <Route path="/notifications" element={<h1>🔔 Notifications Page</h1>} />
+            <Route path="/notifications" element={<KitchenDisplay />} />
             <Route path="/profile" element={<h1>👤 Profile Page</h1>} />
           </Routes>
         </div>
