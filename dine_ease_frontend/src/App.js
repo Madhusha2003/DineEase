@@ -7,6 +7,8 @@ import Sidebar from "./components/sideBar";
 
 import CustomerMenu from "./pages/customerMenu";
 import WaiterOrders from './pages/waiterOrders';
+import Profile from './pages/Profile';
+import Report from './pages/Report';
 
 function App() {
   return (
@@ -17,9 +19,9 @@ function App() {
           <Routes>
             <Route path="/menu" element={<CustomerMenu/>} />
             <Route path="/orders" element={<WaiterOrders/>} />
-            <Route path="/reports" element={<h1>📊 Reports Page</h1>} />
+            <Route path="/reports" element={<Report/>} />
             <Route path="/notifications" element={<h1>🔔 Notifications Page</h1>} />
-            <Route path="/profile" element={<h1>👤 Profile Page</h1>} />
+            <Route path="/profile" element={<Profile/>} />
           </Routes>
         </div>
       </div>
