@@ -4,9 +4,9 @@ import './App.css';
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Sidebar from "./components/sideBar";
 
-
 import CustomerMenu from "./pages/customerMenu";
 import WaiterOrders from './pages/waiterOrders';
+import Login from './pages/Login'
 
 function App() {
   return (
@@ -19,7 +19,7 @@ function App() {
             <Route path="/orders" element={<WaiterOrders/>} />
             <Route path="/reports" element={<h1>📊 Reports Page</h1>} />
             <Route path="/notifications" element={<h1>🔔 Notifications Page</h1>} />
-            <Route path="/profile" element={<h1>👤 Profile Page</h1>} />
+            <Route path="/profile" element={<Login/>} />
           </Routes>
         </div>
       </div>
