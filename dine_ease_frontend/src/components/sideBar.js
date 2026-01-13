@@ -1,4 +1,4 @@
-import { FaUtensils, FaList, FaChartBar, FaBell, FaUser, FaFire } from "react-icons/fa";
+import { FaUtensils, FaList, FaChartBar, FaUser, FaFire } from "react-icons/fa";
 import { Link } from "react-router-dom";
 
 export default function Sidebar() {
