@@ -1,4 +1,4 @@
-import { FaUtensils, FaList, FaChartBar, FaBell, FaUser } from "react-icons/fa";
+import { FaUtensils, FaList, FaChartBar, FaBell, FaUser, FaFire } from "react-icons/fa";
 import { Link } from "react-router-dom";
 
 export default function Sidebar() {
@@ -7,7 +7,7 @@ export default function Sidebar() {
       <Link to="/menu"><FaUtensils className="text-2xl cursor-pointer" /></Link>
       <Link to="/orders"><FaList className="text-2xl cursor-pointer" /></Link>
       <Link to="/reports"><FaChartBar className="text-2xl cursor-pointer" /></Link>
-      <Link to="/notifications"><FaBell className="text-2xl cursor-pointer" /></Link>
+      <Link to="/kitchen"><FaFire className="text-2xl cursor-pointer" /></Link>
       <Link to="/profile"><FaUser className="text-2xl cursor-pointer" /></Link>
     </div>
   );
