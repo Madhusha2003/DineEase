@@ -1,5 +1,30 @@
 import { prisma } from '../lib/prisma.js';
 
+// GET /api/orders
+// Fetches all orders.
+export const getAllOrders = async (req, res) => {
+  try {
+    const orders = await prisma.order.findMany({
+      orderBy: {
+        createdAt: 'desc',
+      },
+      include: {
+        table: true,
+         // Include table details
+        items: {
+          include: {
+            menuItem: true, // Include menu item details for each order item
+          },
+        },
+      },
+    });
+    res.status(200).json(orders);
+  } catch (error) {
+    console.error("Failed to get orders:", error);
+    res.status(500).json({ error: 'An unexpected error occurred while fetching orders.' });
+  }
+};
+
 /// POST /api/orders
 export const createOrder = async (req, res) => {
   const { tableId, cart } = req.body;
@@ -8,13 +33,12 @@ export const createOrder = async (req, res) => {
   try {
     
     // Get current prices from the Database
-    // This prevents someone from "hacking" the price in the browser.
     const itemIds = cart.map(item => item.id);
     const dbMenuItems = await prisma.menuItem.findMany({
       where: { id: { in: itemIds } }
     });
 
-    // 4. Calculate Total
+    // Calculate Total
     let calculatedTotal = 0;
     const orderItemsData = cart.map(cartItem => {
       const menuItem = dbMenuItems.find(dbItem => dbItem.id === cartItem.id);
@@ -26,7 +50,8 @@ export const createOrder = async (req, res) => {
       return {
         menuItemId: menuItem.id,
         quantity: cartItem.quantity,
-        // size and note 
+        size: cartItem.size,
+        // note
       };
     });
 
@@ -87,58 +112,56 @@ export const getOrderById = async (req, res) => {
   }
 };
 
-// PUT /api/orders/:id/item
-// Manages items in a cart: adds, updates quantity, or removes.
-export const manageOrderItem = async (req, res) => {
-  const { id: orderId } = req.params;
-  const { menuItemId, quantity } = req.body; // quantity is the CHANGE in quantity (+1, -1, etc.)
+// PUT /api/orders/:id/status
+// Updates the status of a single order.
+export const updateOrderStatus = async (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body;
 
-  if (!menuItemId || quantity === undefined) {
-    return res.status(400).json({ error: 'menuItemId and quantity are required.' });
+  const validStatuses = ["NEW", "PROCESSING", "READY", "SERVED", "CANCELLED"];
+  if (!status || !validStatuses.includes(status)) {
+    return res.status(400).json({ error: 'Invalid status provided.' });
   }
 
   try {
-    const updatedOrder = await prisma.$transaction(async (tx) => {
-      const existingItem = await tx.orderItem.findFirst({
-        where: {
-          orderId: parseInt(orderId),
-          menuItemId: parseInt(menuItemId),
-        },
-      });
-
-      if (existingItem) {
-        const newQuantity = existingItem.quantity + quantity;
-        if (newQuantity > 0) {
-          await tx.orderItem.update({ where: { id: existingItem.id }, data: { quantity: newQuantity } });
-        } else {
-          await tx.orderItem.delete({ where: { id: existingItem.id } });
-        }
-      } else if (quantity > 0) {
-        await tx.orderItem.create({
-          data: {
-            orderId: parseInt(orderId),
-            menuItemId: parseInt(menuItemId),
-            quantity: quantity,
+    const updatedOrder = await prisma.order.update({
+      where: { id: parseInt(id) },
+      data: { status: status },
+      include: {
+        table: true,
+        items: {
+          include: {
+            menuItem: true,
           },
-        });
-      }
-
-      // Recalculate total price and return the updated order
-      const orderItems = await tx.orderItem.findMany({
-        where: { orderId: parseInt(orderId) },
-        include: { menuItem: true },
-      });
-      const total = orderItems.reduce((sum, item) => sum + item.quantity * item.menuItem.price, 0);
-
-      return tx.order.update({
-        where: { id: parseInt(orderId) },
-        data: { total },
-        include: { items: { orderBy: { id: 'asc' }, include: { menuItem: true } } },
-      });
+        },
+      },
     });
     res.status(200).json(updatedOrder);
   } catch (error) {
-    console.error(`Failed to manage item for order ${orderId}:`, error);
-    res.status(500).json({ error: 'An unexpected error occurred.' });
+    if (error.code === 'P2025') { // Prisma's "record to update not found"
+      return res.status(404).json({ error: 'Order not found.' });
+    }
+    console.error(`Failed to update order status for id ${id}:`, error);
+    res.status(500).json({ error: 'An unexpected error occurred while updating the order status.' });
+  }
+};
+
+// DELETE /api/orders/:id
+export const deleteOrder = async (req, res) => {
+  const { id } = req.params;
+  try {
+    // FIRST: Delete all items belonging to this order
+    await prisma.orderItem.deleteMany({
+      where: { orderId: parseInt(id) }
+    });
+
+    // SECOND: Delete the order itself
+    await prisma.order.delete({
+      where: { id: parseInt(id) }
+    });
+
+    res.status(200).json({ message: "Order and items deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 };
