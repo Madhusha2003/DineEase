@@ -39,13 +39,15 @@ model Table {
 model Order {
   id        Int         @id @default(autoincrement())
   status    OrderStatus @default(NEW)
-  total     Float       // The total price of the order, from waiterOrders.js
+  total     Float       
 
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
 
   tableId   Int
   table     Table       @relation(fields: [tableId], references: [id])
+  
+  customerName String? 
 
   items     OrderItem[] // List of items in this order
 }
@@ -54,8 +56,6 @@ model Order {
 model OrderItem {
   id         Int     @id @default(autoincrement())
   quantity   Int     
-  size       String? // e.g., "Regular", "Medium", "Large"
-  note       String? // e.g., "Extra spicy", "No onions"
 
   orderId    Int
   order      Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)

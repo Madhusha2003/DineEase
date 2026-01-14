@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, use } from "react";
 import MenuCard from "../components/menuCard";
 import TableSelector from "../components/TableSelector";
 
@@ -12,6 +12,7 @@ export default function CustomerMenu() {
   const [menuItems, setMenuItems] = useState([]); // Start with empty list
   const [tables, setTables] = useState([]);
   const [selectedTable, setSelectedTable] = useState("");
+  const [customerName, setCustomerName] = useState("");
   const [loading, setLoading] = useState(true);   // Track loading status
   const [error, setError] = useState(null);       // Track errors
 
@@ -99,28 +100,38 @@ export default function CustomerMenu() {
     ));
   }
   function removeFromCart(id) {
-  setCart(cart.filter(item => item.id !== id));
+    setCart(cart.filter(item => item.id !== id));
   }
 
   // Place order function
   const PlaceOrder = async () => {
-    // 1. Add validation: Ensure a table is selected and the cart is not empty.
+    // Ensure a table is selected 
     if (!selectedTable) {
       alert("Please select a table before placing an order.");
-      return; // Stop the function here
+      return;
+    }
+    if (!customerName.trim()) {
+      alert("Please enter your name before placing an order.");
+      return;
     }
     
+
     try {
       const response = await fetch(`${API_URL}/orders`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ tableId: selectedTable, cart }),
+        body: JSON.stringify({ 
+          tableId: selectedTable,
+          cart,
+          customerName: customerName
+        }),
       });
 
       if (response.ok) {
         const newOrder = await response.json();
         alert(`Order #${newOrder.id} placed successfully!`);
-        setCart([]); // Clear the cart after success!
+        setCart([]); // Clear the cart 
+        setCustomerName(""); // clear the name
       } else {
         const errorData = await response.json();
         throw new Error(errorData.error || "Failed to place order");
@@ -140,7 +151,7 @@ export default function CustomerMenu() {
       <div className="flex-1 p-6">
         {/* Header */}
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold underline">Our Menu</h1>
+          <h1 className="text-3xl font-black text-slate-900 tracking-tight flex items-start gap-3">OUR MENU</h1>
           <h2 className="text-4xl font-bold text-red-600">
             Elees <span className="text-2xl text-black">FOOD COURT</span>
           </h2>
@@ -185,6 +196,7 @@ export default function CustomerMenu() {
                 image={item.image}
                 title={item.title}
                 price={item.price}
+                category={item.category}
                 description={item.description}
                 addToCart={addToCart}
               />
@@ -193,15 +205,33 @@ export default function CustomerMenu() {
 
 
           {/* Checkout Section */}
-          <div className="w-full max-w-sm bg-white p-6 rounded-xl shadow-lg flex flex-col">
-            <h2 className="text-2xl font-bold mb-6 text-gray-800 border-b pb-4">Your Order</h2>
-
-            <TableSelector
-              tables={tables}
-              selectedTable={selectedTable}
-              onTableChange={setSelectedTable}
-            />
-
+          <div className="w-full max-w-sm bg-white rounded-3xl shadow-xl border border-orange-600 flex flex-col p-5 overflow-hidden h-fit sticky top-6">
+            {/* Header with Color Accent */}
+            <div className="bg-orange-600 p-6 rounded-xl">
+              <div className="flex justify-between items-center">
+                <h2 className="text-xl font-black text-white uppercase tracking-tight">Your Order</h2>
+                <span className="bg-white/20 text-white px-3 py-1 rounded-full text-xs font-bold backdrop-blur-md">
+                  {cart.reduce((sum, item) => sum + item.quantity, 0)} Items
+                </span>
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-3 ">
+              <TableSelector
+                tables={tables}
+                selectedTable={selectedTable}
+                onTableChange={setSelectedTable}
+              />
+              <input
+                type="text"
+                placeholder="Customer Name"
+                value={customerName}
+                maxLength={16}
+                onChange={(e) => setCustomerName(e.target.value)}
+                className="flex-1 p-2 border border-gray-300 rounded-xl shadow-sm focus:ring-orange-500 focus:border-orange-500"
+                required
+              />
+            </div>
             {cart.length === 0 ? (
               <div className="flex-grow flex items-center justify-center">
                 <p className="text-gray-500">Your cart is empty.</p>
@@ -232,7 +262,7 @@ export default function CustomerMenu() {
                 </div>
 
                 {/* Summary and Checkout Button */}
-                <div className="mt-6 pt-6 border-t">
+                <div className="mt-2 pt-2 border-t">
                   <div className="flex justify-between font-bold text-xl text-gray-900 mt-4">
                     <span>Total</span>
                     <span>Rs. {cart.reduce((sum, item) => sum + item.price * item.quantity, 0).toFixed(2)}</span>

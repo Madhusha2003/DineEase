@@ -1,135 +1,138 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import KitchenCard from "../components/kitchenCard";
+
+const API_URL = "http://localhost:3001/api";
 
 export default function KitchenDisplay() {
-  const [orders, setOrders] = useState([
-    { id: 11613, table: 1, time: "01:50 PM", items: [{ name: "Crispy Chicken Burger", size: "Regular", qty: 2 }, { name: "Coke", size: "Medium", qty: 1 }], status: "new", wait: "5 mins" },
-    { id: 11614, table: 2, time: "01:52 PM", items: [{ name: "Cheese Veg Wrap", size: "Regular", qty: 1 }, { name: "Lemonade", size: "Large", qty: 2 }], status: "process", wait: "10 mins" },
-    { id: 11615, table: 3, time: "01:53 PM", items: [{ name: "Margherita Pizza", size: "Medium", qty: 1 }, { name: "Pepsi", size: "Medium", qty: 1 }], status: "ready", wait: "0 mins" },
-    { id: 11616, table: 4, time: "01:54 PM", items: [{ name: "Veggie Wrap", size: "Regular", qty: 2 }, { name: "Iced Tea", size: "Medium", qty: 1 }], status: "new", wait: "7 mins" },
-    { id: 11617, table: 5, time: "01:55 PM", items: [{ name: "Chicken Caesar Salad", size: "Regular", qty: 1 }, { name: "Water", size: "Medium", qty: 2 }], status: "process", wait: "12 mins" },
-    { id: 11618, table: 6, time: "01:56 PM", items: [{ name: "BBQ Chicken Pizza", size: "Large", qty: 1 }], status: "ready", wait: "0 mins" },
-    { id: 11619, table: 7, time: "01:57 PM", items: [{ name: "Chicken fried rice", size: "Large", qty: 2 }, { name: "Pepsi", size: "Medium", qty: 1 }], status: "new", wait: "6 mins" },
-    { id: 11620, table: 8, time: "01:58 PM", items: [{ name: "Veg Burger", size: "Regular", qty: 1 }, { name: "Coke", size: "Medium", qty: 1 }], status: "process", wait: "8 mins" },
-    { id: 11621, table: 9, time: "01:59 PM", items: [{ name: "Grilled Chicken Sandwich", size: "Regular", qty: 2 }], status: "ready", wait: "0 mins" },
-    { id: 11622, table: 10, time: "02:00 PM", items: [{ name: "Cheese Pizza", size: "Medium", qty: 1 }, { name: "Orange Juice", size: "Medium", qty: 2 }], status: "new", wait: "5 mins" },
-  ]);
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [lastUpdated, setLastUpdated] = useState(new Date());
 
-  const updateStatus = (id, newStatus) => {
-    if (newStatus === "served") {
-      setOrders(orders.filter(o => o.id !== id));
-    } else {
-      setOrders(orders.map(o => o.id === id ? { ...o, status: newStatus } : o));
+  const fetchOrders = async () => {
+    try {
+      const response = await fetch(`${API_URL}/orders`);
+      if (!response.ok) throw new Error("Failed to fetch orders");
+      const data = await response.json();
+      const kitchenOrders = data.filter(o => ['NEW', 'PROCESSING', 'READY'].includes(o.status));
+      setOrders(kitchenOrders);
+      setLastUpdated(new Date());
+      setError(null);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const cancelOrder = id => setOrders(orders.filter(o => o.id !== id));
+  useEffect(() => {
+    fetchOrders();
+    const interval = setInterval(fetchOrders, 10000); // Polling every 10s
+    return () => clearInterval(interval);
+  }, []);
 
-  const statusColor = status => {
-    switch (status) {
-      case "new": return "bg-blue-100 text-blue-800 border-blue-200";
-      case "process": return "bg-yellow-100 text-yellow-800 border-yellow-200";
-      case "ready": return "bg-green-100 text-green-800 border-green-200";
-      default: return "bg-gray-50 text-gray-700 border-gray-100";
+  const updateStatus = async (id, newStatus) => {
+    try {
+      const response = await fetch(`${API_URL}/orders/${id}/status`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: newStatus }),
+      });
+      if (!response.ok) throw new Error("Action failed");
+      fetchOrders(); // Refresh list to ensure sorting is correct
+    } catch (err) {
+      alert("Error: " + err.message);
     }
   };
 
-  const activeStages = ["new", "process", "ready"];
-  const statusLabel = s => s === "process" ? "processing" : s;
+  const cancelOrder = async (id) => {
+    if (!window.confirm("Cancel this order?")) return;
+    try {
+      await fetch(`${API_URL}/orders/${id}/status`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "CANCELLED" }),
+      });
+      setOrders((prev) => prev.filter((o) => o.id !== id));
+    } catch (err) {
+      alert("Error: " + err.message);
+    }
+  };
 
-  // Separate arrays for ordering: new first, then others
-  const newOrders = orders.filter(o => o.status === "new");
-  const otherOrders = orders.filter(o => o.status !== "new");
+  const statusPriority = { NEW: 1, PROCESSING: 2, READY: 3 };
+  const sortedOrders = [...orders].sort((a, b) => {
+    const pA = statusPriority[a.status] || 99;
+    const pB = statusPriority[b.status] || 99;
+    return pA !== pB ? pA - pB : new Date(a.createdAt) - new Date(b.createdAt);
+  });
+
+  const statsConfig = {
+    NEW: { label: "New Orders", color: "text-blue-600", bg: "bg-blue-100" },
+    PROCESSING: { label: "In Prep", color: "text-yellow-500", bg: "bg-yellow-100" },
+    READY: { label: "Ready", color: "text-green-600", bg: "bg-green-100" },
+  };
+
+  if (loading && orders.length === 0) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-slate-50">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
 
   return (
-    <div className="flex flex-col p-6 space-y-8">
-
-      {/*  Status summary counters */}
-      <div className="flex flex-wrap gap-6">
-        {activeStages.map(stage => (
-          <div key={stage} className="bg-black text-white text-center px-4 py-2 rounded w-28 shadow">
-            <div className="text-2xl font-bold">
-              {orders.filter(o => o.status === stage).length}
-            </div>
-            <div className="capitalize">{statusLabel(stage)}</div>
+    <div className="p-8 pt-1 bg-slate-50 min-h-screen">
+      {/* Header Section */}
+      <div className="flex flex-col md:flex-row justify-between items-end mb-10 gap-4">
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <span className="relative flex h-3 w-3">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+            </span>
+            <h1 className="text-3xl font-black text-slate-800 tracking-tight">KITCHEN LIVE</h1>
           </div>
-        ))}
-      </div>
+          <p className="text-slate-500 font-medium">
+            Last sync: {lastUpdated.toLocaleTimeString()}
+          </p>
+        </div>
 
-      {/* Orders grid – queue cards + others in the same view */}
-      <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-
-        {/* --- New Orders Queue cards highlighted --- */}
-        {newOrders.map(order => (
-          <div
-            key={order.id}
-            className={`relative rounded shadow p-4 border-t-4 ring-2 ring-blue-400 hover:scale-105 transition-transform duration-200 ${statusColor(order.status)}`}
-          >
-            <div className="flex justify-between font-semibold mb-2">
-              <span>🆕 Table {order.table} – Order #{order.id}</span>
-              <span className={`capitalize px-2 py-1 rounded text-sm font-bold ${statusColor(order.status)}`}>
-                {statusLabel(order.status)}
+        {/* Status Summary Counters */}
+        <div className="flex gap-4">
+          {Object.keys(statsConfig).map((stage) => (
+            <div key={stage} className="bg-white px-6 py-3 rounded-2xl shadow-sm border border-slate-200 flex flex-col items-center min-w-[110px]">
+              <span className={`text-2xl font-black ${statsConfig[stage].color}`}>
+                {orders.filter((o) => o.status === stage).length}
+              </span>
+              <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                {statsConfig[stage].label}
               </span>
             </div>
-
-            <div className="text-sm text-gray-600 mb-2">
-              {order.time} | {order.wait}
-            </div>
-
-            {order.items.map((it, i) => (
-              <div key={i} className="text-sm">
-                {it.qty}x {it.name} <em className="text-gray-500">{it.size}</em>
-              </div>
-            ))}
-
-            <div className="flex gap-3 mt-4">
-              <button className="px-3 py-1 bg-green-200 text-green-800 rounded"
-                      onClick={() => updateStatus(order.id, "process")}>Start</button>
-              <button className="px-3 py-1 bg-red-200 text-red-800 rounded"
-                      onClick={() => cancelOrder(order.id)}>Cancel</button>
-            </div>
-          </div>
-        ))}
-
-        {/* --- Remaining Orders --- */}
-        {otherOrders.map(order => (
-          <div
-            key={order.id}
-            className={`relative rounded shadow p-4 border-t-4 hover:scale-105 transition-transform duration-200 ${statusColor(order.status)}`}
-          >
-            <div className="flex justify-between font-semibold mb-2">
-              <span>Table {order.table} – Order #{order.id}</span>
-              <span className={`capitalize px-2 py-1 rounded text-sm font-bold ${statusColor(order.status)}`}>
-                {statusLabel(order.status)}
-              </span>
-            </div>
-
-            <div className="text-sm text-gray-600 mb-2">
-              {order.time} | {order.wait}
-            </div>
-
-            {order.items.map((it, i) => (
-              <div key={i} className="text-sm">
-                {it.qty}x {it.name} <em className="text-gray-500">{it.size}</em>
-              </div>
-            ))}
-
-            <div className="flex gap-3 mt-4">
-              {order.status === "process" && (
-                <button className="px-3 py-1 bg-green-200 text-green-800 rounded"
-                        onClick={() => updateStatus(order.id, "ready")}>Finish</button>
-              )}
-            
-            </div>
-
-            <button
-              className="absolute bottom-3 right-3 px-3 py-1 bg-red-200 text-red-800 rounded"
-              onClick={() => cancelOrder(order.id)}
-            >
-              Cancel
-            </button>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
+
+      {/* Orders Grid */}
+      {error ? (
+        <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl text-center font-bold">
+          Connection Error: {error}
+        </div>
+      ) : sortedOrders.length === 0 ? (
+        <div className="bg-white p-20 rounded-3xl border-2 border-dashed border-slate-200 text-center">
+          <p className="text-slate-400 text-xl font-medium">All clear! No pending orders.</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 auto-rows-fr">
+          {sortedOrders.map((order) => (
+            <KitchenCard
+              key={order.id}
+              order={order}
+              updateStatus={updateStatus}
+              cancelOrder={cancelOrder}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }

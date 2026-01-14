@@ -27,7 +27,7 @@ export const getAllOrders = async (req, res) => {
 
 /// POST /api/orders
 export const createOrder = async (req, res) => {
-  const { tableId, cart } = req.body;
+  const { tableId, cart , customerName} = req.body;
 
 
   try {
@@ -50,7 +50,7 @@ export const createOrder = async (req, res) => {
       return {
         menuItemId: menuItem.id,
         quantity: cartItem.quantity,
-        size: cartItem.size,
+        
         // note
       };
     });
@@ -59,6 +59,7 @@ export const createOrder = async (req, res) => {
     const newOrder = await prisma.order.create({
       data: {
         tableId: parseInt(tableId),
+        customerName: customerName,
         total: calculatedTotal,
         status: "NEW", // This matches your Enum OrderStatus
         items: {

@@ -7,36 +7,35 @@ export default function WaiterOrders() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [lastSync, setLastSync] = useState(new Date());
 
-  // 1. Fetch orders from API
+  const fetchOrders = async () => {
+    try {
+      const response = await fetch(`${API_URL}/orders`);
+      if (!response.ok) throw new Error("Failed to fetch orders");
+      const data = await response.json();
+      // Filter out only active lifecycle for waiter
+      const activeOrders = data.filter(o => ["NEW", "PROCESSING", "READY", "SERVED"].includes(o.status));
+      setOrders(activeOrders);
+      setLastSync(new Date());
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchOrders = async () => {
-      try {
-        setLoading(true);
-        const response = await fetch(`${API_URL}/orders`);
-        if (!response.ok) throw new Error("Failed to fetch orders");
-        const data = await response.json();
-        setOrders(data);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchOrders();
+    const interval = setInterval(fetchOrders, 10000); // Poll every 10 seconds
+    return () => clearInterval(interval);
   }, []);
 
-  // Optimized Update Status Function
   const updateStatus = async (id, newStatus) => {
     try {
       let response;
-      // Note: Backend uses Uppercase Enums (CANCELLED, SETTLED, etc.)
       if (newStatus === "CANCELLED" || newStatus === "SETTLED") {
-        response = await fetch(`${API_URL}/orders/${id}`, {
-          method: "DELETE",
-        });
-        // need to add a API to add cancelled orders to new table also settled
-       // response = await fetch
+        response = await fetch(`${API_URL}/orders/${id}`, { method: "DELETE" });
       } else {
         response = await fetch(`${API_URL}/orders/${id}/status`, {
           method: "PUT",
@@ -45,62 +44,86 @@ export default function WaiterOrders() {
         });
       }
 
-      if (!response.ok) throw new Error("Action failed on server");
+      if (!response.ok) throw new Error("Action failed");
 
-      // Update Local State
+      // Immediate local update for better UX
       if (newStatus === "CANCELLED" || newStatus === "SETTLED") {
-        setOrders((prev) => prev.filter((order) => order.id !== id));
+        setOrders(prev => prev.filter(o => o.id !== id));
       } else {
-        setOrders((prev) =>
-          prev.map((order) =>
-            order.id === id ? { ...order, status: newStatus } : order
-          )
-        );
+        fetchOrders();
       }
     } catch (err) {
-      console.error(err);
       alert("Error: " + err.message);
     }
   };
 
-  //Sorting Logic 
-  const statusPriority = {
-    NEW: 1,
-    PROCESSING: 2,
-    READY: 3,
-    SERVED: 4,
-  };
+  const statusPriority = { READY: 1, NEW: 2, PROCESSING: 3, SERVED: 4 };
 
   const sortedOrders = [...orders].sort((a, b) => {
-    if (statusPriority[a.status] !== statusPriority[b.status]) {
-      return (statusPriority[a.status] || 99) - (statusPriority[b.status] || 99);
-    } else {
-      // Prisma uses 'createdAt'
-      return new Date(a.createdAt) - new Date(b.createdAt);
-    }
+    const pA = statusPriority[a.status] || 99;
+    const pB = statusPriority[b.status] || 99;
+    return pA !== pB ? pA - pB : new Date(a.createdAt) - new Date(b.createdAt);
   });
 
-  // Handle Loading and Error views
-  if (loading) return <div className="p-6 text-center text-gray-500">Loading orders...</div>;
-  if (error) return <div className="p-6 text-center text-red-500 font-bold">Error: {error}</div>;
+  if (loading && orders.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-slate-50">
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-600 mb-4"></div>
+        <p className="text-slate-500 font-medium">Loading active orders...</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Waiter POS – Orders</h1>
-        <span className="bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-sm font-medium">
-          {orders.length} Active Orders
-        </span>
+    <div className="p-8 pt-1 bg-slate-50 min-h-screen">
+      {/* Header Section */}
+      <div className="flex flex-col md:flex-row justify-between items-end mb-8 gap-4">
+        <div className="flex items-center gap-2 mb-1">
+          <span className="relative flex h-3 w-3">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-3 w-3 bg-blue-500"></span>
+          </span>
+          <h1 className="text-3xl font-black text-slate-900 tracking-tight flex items-center gap-3"> WAITER TERMINAL</h1>
+        </div>
+
+        {/* Quick Stats Summary */}
+        <div className="flex gap-3">
+          <div className="bg-green-100 border border-green-200 px-5 py-2 rounded-2xl flex flex-col items-center">
+            <span className="text-xl font-black text-green-700">
+              {orders.filter(o => o.status === "READY").length}
+            </span>
+            <span className="text-[10px] font-bold uppercase text-green-600 tracking-wider">To Serve</span>
+          </div>
+          <div className="bg-indigo-100 border border-indigo-200 px-5 py-2 rounded-2xl flex flex-col items-center">
+            <span className="text-xl font-black text-indigo-700">
+              {orders.length}
+            </span>
+            <span className="text-[10px] font-bold uppercase text-indigo-600 tracking-wider">Active</span>
+          </div>
+        </div>
       </div>
 
+      {/* Error State */}
+      {error && (
+        <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl flex justify-between items-center">
+          <span className="font-medium">Connection issue: {error}</span>
+          <button onClick={fetchOrders} className="text-xs font-bold underline">RETRY</button>
+        </div>
+      )}
+
+      {/* Orders Grid */}
       {sortedOrders.length === 0 ? (
-        <div className="bg-white p-10 rounded-xl border text-center text-gray-400">
-          No active orders found.
+        <div className="bg-white p-20 rounded-3xl border-2 border-dashed border-slate-200 text-center">
+          <p className="text-slate-400 text-lg font-medium">No active orders right now.</p>
         </div>
       ) : (
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 auto-rows-fr">
           {sortedOrders.map((order) => (
-            <OrderCard key={order.id} order={order} updateStatus={updateStatus} />
+            <OrderCard
+              key={order.id}
+              order={order}
+              updateStatus={updateStatus}
+            />
           ))}
         </div>
       )}
