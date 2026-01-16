@@ -30,6 +30,7 @@ model MenuItem {
 model Table {
   id          Int    @id @default(autoincrement())
   tableNumber String @unique // e.g., "T1"
+  capacity    Int    @default(4) // How many people this table can seat
 
   orders Order[] // Relation to orders placed at this table
 }
@@ -47,20 +48,24 @@ model Order {
   table   Table @relation(fields: [tableId], references: [id])
 
   customerName String?
+  numberOfGuests Int @default(1)
 
   items OrderItem[] // List of items in this order
+
+  @@index([status]) // Index to speed up filtering by status
 }
 
 ///  join table between Order and MenuItem.
 model OrderItem {
   id       Int @id @default(autoincrement())
   quantity Int
+  price    Float // Price of the menu item at the time of order
 
   orderId Int
   order   Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
 
   menuItemId Int
-  menuItem   MenuItem @relation(fields: [menuItemId], references: [id])
+  menuItem   MenuItem @relation(fields: [menuItemId], references: [id], onDelete: Cascade)
 }
 
 ///  statuses for an order.
@@ -69,6 +74,7 @@ enum OrderStatus {
   PROCESSING // "process" or "In Preparation"
   READY
   SERVED
+  PAID
   CANCELLED
 }
 
