@@ -27,7 +27,7 @@ export default function WaiterOrders() {
 
   useEffect(() => {
     fetchOrders();
-    const interval = setInterval(fetchOrders, 10000); // Poll every 10 seconds
+    const interval = setInterval(fetchOrders, 5000); // Poll every 5 seconds
     return () => clearInterval(interval);
   }, []);
 

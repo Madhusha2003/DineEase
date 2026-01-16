@@ -1,5 +1,9 @@
 import express from 'express';
 import cors from 'cors';
+
+// import routes
+import authRoutes from './routes/authRoutes.js';
+import userRoutes from './routes/userRoutes.js';
 import menuItemRoutes from './routes/menuItemRoutes.js';
 import tableRoutes from './routes/tableRoutes.js';
 import orderRoutes from './routes/orderRoutes.js';
@@ -20,6 +24,8 @@ app.get('/api', (req, res) => {
 });
 
 // Use the routers
+app.use('/api/auth', authRoutes);
+app.use('/api/users', userRoutes);
 app.use('/api/menu-items', menuItemRoutes);
 app.use('/api/tables', tableRoutes);
 app.use('/api/orders', orderRoutes);
