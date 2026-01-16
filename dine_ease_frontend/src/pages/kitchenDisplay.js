@@ -11,11 +11,11 @@ export default function KitchenDisplay() {
 
   const fetchOrders = async () => {
     try {
-      const response = await fetch(`${API_URL}/orders`);
+      // Fetch only the orders relevant to the kitchen to improve efficiency.
+      const response = await fetch(`${API_URL}/orders?statuses=NEW,PROCESSING,READY`);
       if (!response.ok) throw new Error("Failed to fetch orders");
       const data = await response.json();
-      const kitchenOrders = data.filter(o => ['NEW', 'PROCESSING', 'READY'].includes(o.status));
-      setOrders(kitchenOrders);
+      setOrders(data); // No more frontend filtering needed!
       setLastUpdated(new Date());
       setError(null);
     } catch (err) {

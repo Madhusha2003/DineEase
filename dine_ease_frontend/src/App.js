@@ -10,6 +10,8 @@ import WaiterOrders from './pages/waiterOrders';
 import KitchenDisplay from "./pages/kitchenDisplay";
 import Profile from './pages/Profile';
 import Report from './pages/Report';
+import MenuManagement from './pages/MenuManagement';
+import TableManagement from './pages/TableManagement';
 
 function App() {
   return (
@@ -23,7 +25,8 @@ function App() {
             <Route path="/orders" element={<ProtectedRoute Component={WaiterOrders} requiredRoles={['ADMIN', 'WAITER']} />} />
             <Route path="/kitchen" element={<ProtectedRoute Component={KitchenDisplay} requiredRoles={['ADMIN', 'KITCHENSTAFF']} />} />
             <Route path="/reports" element={<ProtectedRoute Component={Report} requiredRoles={['ADMIN']} />} />
-            
+            <Route path="/menu_management" element={<ProtectedRoute Component={MenuManagement} requiredRoles={['ADMIN']} />} />
+            <Route path="/table_management" element={<ProtectedRoute Component={TableManagement} requiredRoles={['ADMIN']} />} />
             {/* Profile/Login - public */}
             <Route path="/profile" element={<Profile/>} />
             

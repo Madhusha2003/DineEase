@@ -1,0 +1,5 @@
+-- AlterTable
+ALTER TABLE `order` ADD COLUMN `numberOfGuests` INTEGER NOT NULL DEFAULT 1;
+
+-- AlterTable
+ALTER TABLE `table` ADD COLUMN `capacity` INTEGER NOT NULL DEFAULT 4;

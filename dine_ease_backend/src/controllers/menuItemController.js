@@ -2,9 +2,18 @@ import { prisma } from '../lib/prisma.js';
 
 // GET /api/menu-items
 // Fetches all menu items.
+// By default, only returns items where `isAvailable` is true.
+// Use the query parameter `?showAll=true` to fetch all items (for admin views).
 export const getAllMenuItems = async (req, res) => {
+  const { showAll } = req.query;
+
   try {
-    const menuItems = await prisma.menuItem.findMany();
+    const where = {};
+    if (showAll !== 'true') {
+      where.isAvailable = true;
+    }
+
+    const menuItems = await prisma.menuItem.findMany({ where });
     res.status(200).json(menuItems);
   } catch (error) {
     console.error("Failed to get menu items:", error);
@@ -69,6 +78,18 @@ export const updateMenuItem = async (req, res) => {
 export const deleteMenuItem = async (req, res) => {
   const { id } = req.params;
   try {
+    // First, check if the menu item has any associated orders.
+    const orderItemCount = await prisma.orderItem.count({
+      where: { menuItemId: parseInt(id) },
+    });
+
+    if (orderItemCount > 0) {
+      return res.status(409).json({ 
+        error: 'Cannot delete menu item. It has associated orders. Please mark it as unavailable instead.' 
+      });
+    }
+
+    // If no orders, proceed with deletion.
     await prisma.menuItem.delete({
       where: { id: parseInt(id) },
     });

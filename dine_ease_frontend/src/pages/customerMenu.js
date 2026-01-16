@@ -1,4 +1,4 @@
-import { useState, useEffect, use } from "react";
+import { useState, useEffect } from "react";
 import MenuCard from "../components/menuCard";
 import TableSelector from "../components/TableSelector";
 
@@ -13,6 +13,7 @@ export default function CustomerMenu() {
   const [tables, setTables] = useState([]);
   const [selectedTable, setSelectedTable] = useState("");
   const [customerName, setCustomerName] = useState("");
+  const [numberOfGuests, setNumberOfGuests] = useState(1);
   const [loading, setLoading] = useState(true);   // Track loading status
   const [error, setError] = useState(null);       // Track errors
 
@@ -114,6 +115,16 @@ export default function CustomerMenu() {
       alert("Please enter your name before placing an order.");
       return;
     }
+
+    // Final capacity check before sending to backend
+    const table = tables.find(t => t.id === parseInt(selectedTable));
+    if (table && (table.occupiedSeats + numberOfGuests) > table.capacity) {
+      alert(
+        `Table ${table.tableNumber} does not have enough capacity for ${numberOfGuests} guests. ` +
+        `It currently has ${table.capacity - table.occupiedSeats} seat(s) available.`
+      );
+      return;
+    }
     
 
     try {
@@ -123,7 +134,8 @@ export default function CustomerMenu() {
         body: JSON.stringify({ 
           tableId: selectedTable,
           cart,
-          customerName: customerName
+          customerName: customerName,
+          numberOfGuests: numberOfGuests
         }),
       });
 
@@ -221,14 +233,24 @@ export default function CustomerMenu() {
                 tables={tables}
                 selectedTable={selectedTable}
                 onTableChange={setSelectedTable}
+                numberOfGuests={numberOfGuests}
               />
               <input
                 type="text"
                 placeholder="Customer Name"
                 value={customerName}
-                maxLength={16}
+                maxLength={10}
                 onChange={(e) => setCustomerName(e.target.value)}
-                className="flex-1 p-2 border border-gray-300 rounded-xl shadow-sm focus:ring-orange-500 focus:border-orange-500"
+                className="w-20 flex-1 p-2 border border-gray-300 rounded-xl shadow-sm focus:ring-orange-500 focus:border-orange-500"
+                required
+              />
+              <input
+                type="number"
+                placeholder="Guests"
+                min="1"
+                value={numberOfGuests}
+                onChange={(e) => setNumberOfGuests(Math.max(1, parseInt(e.target.value) || 1))}
+                className="w-20 p-2 border border-gray-300 rounded-xl shadow-sm focus:ring-orange-500 focus:border-orange-500"
                 required
               />
             </div>

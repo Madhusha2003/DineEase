@@ -1,4 +1,4 @@
-import { FaUtensils, FaList, FaChartBar, FaUser, FaFire, FaSignOutAlt } from "react-icons/fa";
+import { FaUtensils, FaList, FaChartBar, FaUser, FaFire, FaSignOutAlt, FaEdit, FaTable } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
 import { getUserRole } from "../utils/tokenUtils";
 
@@ -17,7 +17,7 @@ export default function Sidebar() {
     <div className="w-16 bg-gray-200 h-screen flex flex-col items-center py-6 space-y-8 shadow-md">
       {isLoggedIn ? (
         <>
-          {/* Menu - ADMIN, WAITER */}
+          {/* Customer Menu - ADMIN, WAITER */}
           {['ADMIN', 'WAITER'].includes(userRole) && (
             <Link to="/menu" title="Menu">
               <FaUtensils className="text-2xl cursor-pointer hover:text-orange-600" />
@@ -35,6 +35,20 @@ export default function Sidebar() {
           {userRole === 'ADMIN' && (
             <Link to="/reports" title="Reports">
               <FaChartBar className="text-2xl cursor-pointer hover:text-orange-600" />
+            </Link>
+          )}
+
+          {/* Menu Management - ADMIN only */}
+          {userRole === 'ADMIN' && (
+            <Link to="/menu_management" title="Manage Menu">
+              <FaEdit className="text-2xl cursor-pointer hover:text-orange-600" />
+            </Link>
+          )}
+
+          {/* Table Management - ADMIN only */}
+          {userRole === 'ADMIN' && (
+            <Link to="/table_management" title="Manage Tables">
+              <FaTable className="text-2xl cursor-pointer hover:text-orange-600" />
             </Link>
           )}
 

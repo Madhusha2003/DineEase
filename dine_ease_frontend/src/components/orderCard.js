@@ -72,7 +72,7 @@ export default function OrderCard({ order, updateStatus }) {
             )}
             {order.status === "SERVED" && (
                 <button
-                    onClick={() => updateStatus(order.id, "SETTLED")}
+                    onClick={() => updateStatus(order.id, "PAID")}
                     className="px-4 py-1.5 bg-indigo-500 hover:bg-indigo-600 text-white rounded-lg text-sm font-medium transition-colors"
                 >
                     Settle Payment

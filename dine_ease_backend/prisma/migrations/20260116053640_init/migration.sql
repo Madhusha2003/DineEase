@@ -24,13 +24,14 @@ CREATE TABLE `Table` (
 -- CreateTable
 CREATE TABLE `Order` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
-    `status` ENUM('NEW', 'PROCESSING', 'READY', 'SERVED', 'CANCELLED') NOT NULL DEFAULT 'NEW',
+    `status` ENUM('NEW', 'PROCESSING', 'READY', 'SERVED', 'PAID', 'CANCELLED') NOT NULL DEFAULT 'NEW',
     `total` DOUBLE NOT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
     `tableId` INTEGER NOT NULL,
     `customerName` VARCHAR(191) NULL,
 
+    INDEX `Order_status_idx`(`status`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -38,6 +39,7 @@ CREATE TABLE `Order` (
 CREATE TABLE `OrderItem` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `quantity` INTEGER NOT NULL,
+    `price` DOUBLE NOT NULL,
     `orderId` INTEGER NOT NULL,
     `menuItemId` INTEGER NOT NULL,
 

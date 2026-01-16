@@ -2,15 +2,34 @@ import { prisma } from '../lib/prisma.js';
 
 // GET /api/orders
 // Fetches all orders.
+// By default, it returns active orders (not PAID or CANCELLED).
+// e.g., /api/orders?statuses=NEW,PROCESSING
+// e.g., /api/orders?statuses=PAID
 export const getAllOrders = async (req, res) => {
+  const { statuses } = req.query;
+
   try {
+    const where = {};
+
+    if (statuses) {
+      // Filter by a list of statuses if the query param is present
+      where.status = {
+        in: statuses.split(',').map(s => s.trim().toUpperCase()),
+      };
+    } else {
+      // By default, only fetch active orders for kitchen and waiters
+      where.status = {
+        notIn: ['PAID', 'CANCELLED'],
+      };
+    }
+
     const orders = await prisma.order.findMany({
+      where,
       orderBy: {
         createdAt: 'desc',
       },
       include: {
         table: true,
-         // Include table details
         items: {
           include: {
             menuItem: true, // Include menu item details for each order item
@@ -27,7 +46,7 @@ export const getAllOrders = async (req, res) => {
 
 /// POST /api/orders
 export const createOrder = async (req, res) => {
-  const { tableId, cart , customerName} = req.body;
+  const { tableId, cart, customerName, numberOfGuests } = req.body;
 
 
   try {
@@ -48,18 +67,22 @@ export const createOrder = async (req, res) => {
       calculatedTotal += menuItem.price * cartItem.quantity;
 
       return {
-        menuItemId: menuItem.id,
         quantity: cartItem.quantity,
-        
-        // note
+        price: menuItem.price, // Store the price at the time of order
+        menuItem: {
+          connect: { id: menuItem.id },
+        },
       };
     });
 
     // 5. Create Order and OrderItems (Prisma Nested Write)
     const newOrder = await prisma.order.create({
       data: {
-        tableId: parseInt(tableId),
+        table: {
+          connect: { id: parseInt(tableId) },
+        },
         customerName: customerName,
+        numberOfGuests: parseInt(numberOfGuests) || 1, // Default to 1 guest if not provided
         total: calculatedTotal,
         status: "NEW", // This matches your Enum OrderStatus
         items: {
@@ -119,7 +142,7 @@ export const updateOrderStatus = async (req, res) => {
   const { id } = req.params;
   const { status } = req.body;
 
-  const validStatuses = ["NEW", "PROCESSING", "READY", "SERVED", "CANCELLED"];
+  const validStatuses = ["NEW", "PROCESSING", "READY", "SERVED", "PAID", "CANCELLED"];
   if (!status || !validStatuses.includes(status)) {
     return res.status(400).json({ error: 'Invalid status provided.' });
   }
@@ -151,18 +174,18 @@ export const updateOrderStatus = async (req, res) => {
 export const deleteOrder = async (req, res) => {
   const { id } = req.params;
   try {
-    // FIRST: Delete all items belonging to this order
-    await prisma.orderItem.deleteMany({
-      where: { orderId: parseInt(id) }
-    });
-
-    // SECOND: Delete the order itself
+    // Thanks to `onDelete: Cascade` in the schema, we only need to delete the order.
+    // Prisma will automatically delete the associated OrderItems.
     await prisma.order.delete({
-      where: { id: parseInt(id) }
+      where: { id: parseInt(id) },
     });
 
-    res.status(200).json({ message: "Order and items deleted successfully" });
+    res.status(200).json({ message: 'Order and associated items deleted successfully' });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    if (error.code === 'P2025') { // Prisma's "record to delete not found"
+      return res.status(404).json({ error: 'Order not found.' });
+    }
+    console.error(`Failed to delete order with id ${id}:`, error);
+    res.status(500).json({ error: 'An unexpected error occurred while deleting the order.' });
   }
 };

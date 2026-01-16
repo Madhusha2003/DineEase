@@ -14,9 +14,8 @@ export default function WaiterOrders() {
       const response = await fetch(`${API_URL}/orders`);
       if (!response.ok) throw new Error("Failed to fetch orders");
       const data = await response.json();
-      // Filter out only active lifecycle for waiter
-      const activeOrders = data.filter(o => ["NEW", "PROCESSING", "READY", "SERVED"].includes(o.status));
-      setOrders(activeOrders);
+      // The backend now returns only active orders by default, so no frontend filtering is needed.
+      setOrders(data);
       setLastSync(new Date());
     } catch (err) {
       setError(err.message);
@@ -33,23 +32,23 @@ export default function WaiterOrders() {
 
   const updateStatus = async (id, newStatus) => {
     try {
-      let response;
-      if (newStatus === "CANCELLED" || newStatus === "SETTLED") {
-        response = await fetch(`${API_URL}/orders/${id}`, { method: "DELETE" });
-      } else {
-        response = await fetch(`${API_URL}/orders/${id}/status`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ status: newStatus }),
-        });
-      }
+      // All status updates (including PAID and CANCELLED) are now PUT requests.
+      // This preserves the order for reporting instead of deleting it.
+      const response = await fetch(`${API_URL}/orders/${id}/status`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: newStatus }),
+      });
 
       if (!response.ok) throw new Error("Action failed");
 
       // Immediate local update for better UX
-      if (newStatus === "CANCELLED" || newStatus === "SETTLED") {
+      if (newStatus === "PAID" || newStatus === "CANCELLED") {
+        // If an order is paid or cancelled, remove it from the active view.
         setOrders(prev => prev.filter(o => o.id !== id));
       } else {
+        // For other status changes (e.g., NEW -> SERVED), refresh the whole list
+        // to ensure correct sorting and data.
         fetchOrders();
       }
     } catch (err) {
