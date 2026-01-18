@@ -11,6 +11,7 @@ import orderRoutes from './routes/orderRoutes.js';
 // Initialize Express app and Prisma Client
 const app = express();
 const PORT = process.env.PORT || 3001;
+// const PORT = process.env.PORT || 8000;
 
 // Enable CORS for all routes to allow frontend requests
 app.use(cors());
