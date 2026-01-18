@@ -1,0 +1,65 @@
+Local Network Deployment Architecture
+
+┌─────────────────────────────────────────┐
+│   Main PC (Server)                      │
+│   - Node.js Backend (port 3000)         │
+│   - MySQL Database (local)              │
+│   - React Frontend (port 3000 or 3001)  │
+└──────────────────┬──────────────────────┘
+       WiFi Network (192.168.x.x)
+     ┌──────────────┼──────────────┐
+     │              │              │
+┌────▼────┐   ┌────▼────┐   ┌────▼────┐
+│ Tablet 1│   │ Tablet 2│   │   PC    │
+│ Waiter  │   │ Waiter  │   │ Manager │
+└─────────┘   └─────────┘   └─────────┘
+
+Setup Steps
+1. Main PC - Backend Server
+
+# In backend folder
+npm install
+
+# Update .env file with LOCAL network IP
+DATABASE_URL=mysql://root:password@localhost:3306/dineease
+NODE_ENV=production
+PORT=3000
+JWT_SECRET=your_secret
+
+2. Main PC - Start Services
+
+# Terminal 1: Start Backend
+cd dine_ease_backend
+npm start  # or node src/server.js for production
+
+# Terminal 2: Start Frontend (React)
+cd dine_ease_frontend
+npm start  # Runs on http://localhost:3000
+
+3. Find Your PC's Local IP
+# In PowerShell
+ipconfig
+# Look for "IPv4 Address" - something like 192.168.x.xxx
+
+4. Access from Tablets/Other PC
+In tablet browser, go to:
+http://192.168.x.xxx:3000
+
+(Replace with your PC's actual local IP)
+
+What You Need
+Item	Setup
+Main PC	Node.js + MySQL installed, runs backend + frontend
+Tablets	Any web browser (Chrome, Safari, Firefox)
+Network	All devices on same WiFi
+Database	Local MySQL on main PC
+
+Production-Ready Local Setup (Recommended)
+Instead of npm start, use:
+
+# Backend - production mode
+NODE_ENV=production node src/server.js
+
+# Frontend - build & serve
+npm run build
+npx serve -s build -l 3000
