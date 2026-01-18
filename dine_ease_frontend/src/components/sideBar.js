@@ -1,4 +1,4 @@
-import { FaUtensils, FaList, FaChartBar, FaUser, FaFire, FaSignOutAlt, FaEdit, FaTable } from "react-icons/fa";
+import { FaUtensils, FaList, FaChartBar, FaUser, FaFire, FaSignOutAlt, FaEdit, FaTable, FaUserEdit, FaHistory } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
 import { getUserRole } from "../utils/tokenUtils";
 
@@ -31,17 +31,17 @@ export default function Sidebar() {
             </Link>
           )}
 
+          {/* Kitchen Display - ADMIN, KITCHENSTAFF */}
+          {['ADMIN', 'KITCHENSTAFF'].includes(userRole) && (
+            <Link to="/kitchen" title="Kitchen Display">
+              <FaFire className="text-2xl cursor-pointer hover:text-orange-600" />
+            </Link>
+          )}
+
           {/* Reports - ADMIN only */}
           {userRole === 'ADMIN' && (
             <Link to="/reports" title="Reports">
               <FaChartBar className="text-2xl cursor-pointer hover:text-orange-600" />
-            </Link>
-          )}
-
-          {/* Menu Management - ADMIN only */}
-          {userRole === 'ADMIN' && (
-            <Link to="/menu_management" title="Manage Menu">
-              <FaEdit className="text-2xl cursor-pointer hover:text-orange-600" />
             </Link>
           )}
 
@@ -52,10 +52,24 @@ export default function Sidebar() {
             </Link>
           )}
 
-          {/* Kitchen Display - ADMIN, KITCHENSTAFF */}
-          {['ADMIN', 'KITCHENSTAFF'].includes(userRole) && (
-            <Link to="/kitchen" title="Kitchen Display">
-              <FaFire className="text-2xl cursor-pointer hover:text-orange-600" />
+          {/* Menu Management - ADMIN only */}
+          {userRole === 'ADMIN' && (
+            <Link to="/menu_management" title="Manage Menu">
+              <FaEdit className="text-2xl cursor-pointer hover:text-orange-600" />
+            </Link>
+          )}
+
+          {/* Order Management - ADMIN */}
+          {userRole === 'ADMIN' && (
+            <Link to="/order_management" title="Manage Orders">
+              <FaHistory className="text-2xl cursor-pointer hover:text-orange-600" />
+            </Link>
+          )}
+
+          {/* Staff Management - ADMIN only */}
+          {userRole === 'ADMIN' && (
+            <Link to="/staff_management" title="Manage Staff">
+              <FaUserEdit className="text-2xl cursor-pointer hover:text-orange-600" />
             </Link>
           )}
 

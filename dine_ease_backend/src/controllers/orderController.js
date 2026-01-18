@@ -189,3 +189,22 @@ export const deleteOrder = async (req, res) => {
     res.status(500).json({ error: 'An unexpected error occurred while deleting the order.' });
   }
 };
+
+// DELETE /api/orders/historical
+// Deletes all orders with a 'PAID' or 'CANCELLED' status.
+export const deleteHistoricalOrders = async (req, res) => {
+  try {
+    const result = await prisma.order.deleteMany({
+      where: {
+        status: {
+          in: ['PAID', 'CANCELLED'],
+        },
+      },
+    });
+
+    res.status(200).json({ message: `Successfully deleted ${result.count} historical orders.` });
+  } catch (error) {
+    console.error('Failed to delete historical orders:', error);
+    res.status(500).json({ error: 'An unexpected error occurred while deleting historical orders.' });
+  }
+};
