@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import StaffForm from '../components/StaffForm'; // Correct import for the new StaffForm
+import API_URL from "../config/api";
 
-const API_URL = "http://localhost:3001/api";
 
 export default function StaffManagement() {
   const [staff, setStaff] = useState([]); 

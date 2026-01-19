@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { getUserRole } from '../utils/tokenUtils';
+import API_URL from "../config/api";
 
-const API_URL = "http://localhost:3001/api";
 
 const Login = () => {
   const [email, setEmail] = useState("");

@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import MenuCard from "../components/menuCard";
 import TableSelector from "../components/TableSelector";
+import API_URL from "../config/api";
 
-const API_URL = "http://localhost:3001/api";
 export default function CustomerMenu() {
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");

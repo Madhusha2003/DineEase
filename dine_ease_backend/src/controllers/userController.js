@@ -1,8 +1,7 @@
 import bcrypt from 'bcryptjs';
 import pkg from '@prisma/client';
-const { PrismaClient, Role } = pkg;
-
-const prisma = new PrismaClient();
+const { Role } = pkg;
+import { prisma } from '../lib/prisma.js';
 
 // @desc    Register a new user
 // @route   POST /api/users

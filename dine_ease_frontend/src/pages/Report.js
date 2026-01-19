@@ -5,8 +5,8 @@ import {
   XAxis, YAxis, Tooltip, CartesianGrid, Legend, PieChart, Pie, Cell, ResponsiveContainer
 } from "recharts";
 import { getTodayRange, getThisWeekRange, getThisMonthRange, getThisYearRange } from "../utils/dateUtils";
+import API_URL from "../config/api";
 
-const API_URL = "http://localhost:3001/api";
 const COLORS = ["#3b82f6", "#22c55e", "#f97316", "#e11d48", "#8b5cf6"];
 
 /**

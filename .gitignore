@@ -7,5 +7,9 @@ dine_ease_backend/node_modules
 dist
 build
 
-# environment files
+# environment files - NEVER commit these!
 .env
+.env.local
+.env.*.local
+.env.production
+

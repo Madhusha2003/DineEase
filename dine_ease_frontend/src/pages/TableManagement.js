@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { FaPlus, FaTrash } from 'react-icons/fa';
+import API_URL from "../config/api";
 
-const API_URL = "http://localhost:3001/api";
 
 // A modal form for adding a new table
 const AddTableForm = ({ onSave, onCancel }) => {

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import OrderCard from "../components/orderCard";
+import API_URL from "../config/api";
 
-const API_URL = "http://localhost:3001/api";
 
 export default function WaiterOrders() {
   const [orders, setOrders] = useState([]);

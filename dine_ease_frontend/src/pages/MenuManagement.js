@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import MenuItemForm from '../components/MenuItemForm';
+import API_URL from "../config/api";
 
-const API_URL = "http://localhost:3001/api";
 
 export default function MenuManagement() {
   const [menuItems, setMenuItems] = useState([]);

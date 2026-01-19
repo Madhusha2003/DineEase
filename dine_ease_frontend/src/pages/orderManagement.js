@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { getTodayRange, getThisWeekRange, getThisYearRange } from '../utils/dateUtils';
+import API_URL from "../config/api";
 
-const API_URL = "http://localhost:3001/api";
 
 export default function OrderManagement() {
   const [orders, setOrders] = useState([]);
