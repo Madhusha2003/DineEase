@@ -6,7 +6,7 @@ export default function TableSelector({ tables, selectedTable, onTableChange, nu
         id="table-select"
         value={selectedTable}
         onChange={(e) => onTableChange(e.target.value)}
-        className="w-auto p-2 border border-gray-300 rounded-xl shadow-sm focus:ring-orange-500 focus:border-orange-500"
+        className="w-full p-2 border border-gray-300 rounded-xl shadow-sm focus:ring-orange-500 focus:border-orange-500"
         required
       >
         <option value="" disabled>Select a Table</option>

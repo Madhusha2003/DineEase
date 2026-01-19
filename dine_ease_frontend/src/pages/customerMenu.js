@@ -13,7 +13,7 @@ export default function CustomerMenu() {
   const [tables, setTables] = useState([]);
   const [selectedTable, setSelectedTable] = useState("");
   const [customerName, setCustomerName] = useState("");
-  const [numberOfGuests, setNumberOfGuests] = useState(1);
+  const [numberOfGuests, setNumberOfGuests] = useState('');
   const [loading, setLoading] = useState(true);   // Track loading status
   const [error, setError] = useState(null);       // Track errors
 
@@ -113,6 +113,10 @@ export default function CustomerMenu() {
     }
     if (!customerName.trim()) {
       alert("Please enter your name before placing an order.");
+      return;
+    }
+    if (numberOfGuests < 1) {
+      alert("Please enter the number of guests.");
       return;
     }
 
@@ -228,40 +232,49 @@ export default function CustomerMenu() {
               </div>
             </div>
             
-            <div className="flex items-center gap-3 ">
+            {/* Table Selector */}
+            <div className="mt-1">
               <TableSelector
                 tables={tables}
                 selectedTable={selectedTable}
                 onTableChange={setSelectedTable}
                 numberOfGuests={numberOfGuests}
               />
-              <input
-                type="text"
-                placeholder="Customer Name"
-                value={customerName}
-                maxLength={10}
-                onChange={(e) => setCustomerName(e.target.value)}
-                className="w-20 flex-1 p-2 border border-gray-300 rounded-xl shadow-sm focus:ring-orange-500 focus:border-orange-500"
-                required
-              />
-              <input
-                type="number"
-                placeholder="Guests"
-                min="1"
-                value={numberOfGuests}
-                onChange={(e) => setNumberOfGuests(Math.max(1, parseInt(e.target.value) || 1))}
-                className="w-20 p-2 border border-gray-300 rounded-xl shadow-sm focus:ring-orange-500 focus:border-orange-500"
-                required
-              />
+            </div>
+
+            {/* Customer Info */}
+            <div className="mt-1 flex items-center gap-3">
+              <div className="flex-1">
+                <input
+                  type="text"
+                  placeholder="Customer Name"
+                  value={customerName}
+                  maxLength={10}
+                  onChange={(e) => setCustomerName(e.target.value)}
+                  className="w-full p-2 border border-gray-300 rounded-xl shadow-sm focus:ring-orange-500 focus:border-orange-500"
+                  required
+                />
+              </div>
+              <div className="w-24">
+                <input
+                  type="number"
+                  placeholder="Guests"
+                  min="1"
+                  value={numberOfGuests}
+                  onChange={(e) => setNumberOfGuests(e.target.value ? Math.max(1, parseInt(e.target.value) || 0) : "")}
+                  className="w-full p-2 border border-gray-300 rounded-xl shadow-sm focus:ring-orange-500 focus:border-orange-500"
+                  required
+                />
+              </div>
             </div>
             {cart.length === 0 ? (
-              <div className="flex-grow flex items-center justify-center">
+              <div className="mt-4 flex-grow flex items-center justify-center">
                 <p className="text-gray-500">Your cart is empty.</p>
               </div>
             ) : (
               <>
                 {/* Item List */}
-                <div className="flex-grow overflow-y-auto pr-2 -mr-2">
+                <div className="mt-2 flex-grow overflow-y-auto pr-2 -mr-2">
                   <div className="space-y-4">
                     {cart.map(item => (
                       <div key={item.id} className="flex items-center gap-4">
