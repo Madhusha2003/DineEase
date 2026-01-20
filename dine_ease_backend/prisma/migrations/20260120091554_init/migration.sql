@@ -16,6 +16,7 @@ CREATE TABLE `MenuItem` (
 CREATE TABLE `Table` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `tableNumber` VARCHAR(191) NOT NULL,
+    `capacity` INTEGER NOT NULL DEFAULT 4,
 
     UNIQUE INDEX `Table_tableNumber_key`(`tableNumber`),
     PRIMARY KEY (`id`)
@@ -30,6 +31,7 @@ CREATE TABLE `Order` (
     `updatedAt` DATETIME(3) NOT NULL,
     `tableId` INTEGER NOT NULL,
     `customerName` VARCHAR(191) NULL,
+    `numberOfGuests` INTEGER NOT NULL DEFAULT 1,
 
     INDEX `Order_status_idx`(`status`),
     PRIMARY KEY (`id`)
@@ -66,4 +68,4 @@ ALTER TABLE `Order` ADD CONSTRAINT `Order_tableId_fkey` FOREIGN KEY (`tableId`) 
 ALTER TABLE `OrderItem` ADD CONSTRAINT `OrderItem_orderId_fkey` FOREIGN KEY (`orderId`) REFERENCES `Order`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `OrderItem` ADD CONSTRAINT `OrderItem_menuItemId_fkey` FOREIGN KEY (`menuItemId`) REFERENCES `MenuItem`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `OrderItem` ADD CONSTRAINT `OrderItem_menuItemId_fkey` FOREIGN KEY (`menuItemId`) REFERENCES `MenuItem`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;

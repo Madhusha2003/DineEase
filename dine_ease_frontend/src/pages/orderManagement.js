@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { getTodayRange, getThisWeekRange, getThisYearRange } from '../utils/dateUtils';
 import API_URL from "../config/api";
+import { notify } from '../utils/notify';
+import {useConfirm} from '../hooks/useConfirm';
 
 
 export default function OrderManagement() {
@@ -10,6 +12,7 @@ export default function OrderManagement() {
   const [statusFilter, setStatusFilter] = useState('ALL'); // ALL, PAID, CANCELLED
   const [dateFilter, setDateFilter] = useState('ALL'); // ALL, TODAY, WEEK, YEAR
 
+  const {confirm, ConfirmUI} = useConfirm(null);
   // Helper function to get date range based on filter
   const getDateRange = (filterType) => {
     switch (filterType) {
@@ -47,7 +50,8 @@ export default function OrderManagement() {
   }, []);
 
   const handleDeleteAll = async () => {
-    if (!window.confirm('Are you sure you want to delete ALL historical (Paid and Cancelled) orders? This action cannot be undone.')) {
+    const ok = await confirm("Confirm Deletion", "Are you sure you want to delete ALL historical (Paid and Cancelled) orders? This action cannot be undone.");
+    if (!ok) {
       return;
     }
 
@@ -62,10 +66,10 @@ export default function OrderManagement() {
       }
       
       const result = await response.json();
-      alert(result.message || 'Historical orders deleted successfully!');
+      notify.success(result.message || 'Historical orders deleted successfully!');
       fetchOrders(); // Refresh the list, which should now be empty
     } catch (err) {
-      alert(`Error: ${err.message}`);
+      notify.error(`Error: ${err.message}`);
     }
   };
 
@@ -121,6 +125,7 @@ export default function OrderManagement() {
                 title={orders.length === 0 ? "No orders to delete" : "Delete all historical orders"}>
                 Delete All
             </button>
+        <ConfirmUI />
         </div>
       </div>
 

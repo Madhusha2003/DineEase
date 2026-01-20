@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import MenuItemForm from '../components/MenuItemForm';
 import API_URL from "../config/api";
+import { notify } from '../utils/notify';
+import { useConfirm } from '../hooks/useConfirm';
 
 
 export default function MenuManagement() {
@@ -9,6 +11,7 @@ export default function MenuManagement() {
   const [error, setError] = useState(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
+  const {confirm, ConfirmUI} = useConfirm();
 
   const fetchMenuItems = async () => {
     setLoading(true);
@@ -46,23 +49,24 @@ export default function MenuManagement() {
         throw new Error(errorData.error || `Failed to ${isEditing ? 'update' : 'create'} item.`);
       }
 
-      alert(`Item ${isEditing ? 'updated' : 'created'} successfully!`);
+      notify.success(`Item ${isEditing ? 'updated' : 'created'} successfully!`);
       setIsFormOpen(false);
       fetchMenuItems();
     } catch (err) {
-      alert(err.message);
+      notify.error(err.message);
     }
   };
 
   const handleDelete = async (itemId) => {
-    if (!window.confirm('Are you sure you want to delete this item?')) return;
+    const ok = await confirm("Confirm Delete", "Are you sure you want to delete this item?");
+    if (!ok) return;
 
     try {
       const response = await fetch(`${API_URL}/menu-items/${itemId}`, { method: 'DELETE' });
       
       // Handle 204 No Content (success)
       if (response.status === 204) {
-        alert('Item deleted successfully!');
+        notify.success('Item deleted successfully!');
         fetchMenuItems();
         return;
       }
@@ -73,7 +77,7 @@ export default function MenuManagement() {
         throw new Error(errorData.error || 'Failed to delete item.');
       }
     } catch (err) {
-      alert(err.message);
+      notify.error(err.message);
     }
   };
 
@@ -114,6 +118,7 @@ export default function MenuManagement() {
           </tbody>
         </table>
       </div>
+      <ConfirmUI />
     </div>
   );
 }

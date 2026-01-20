@@ -1,5 +1,4 @@
 import './App.css';
-
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Sidebar from "./components/sideBar";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -14,6 +13,7 @@ import MenuManagement from './pages/MenuManagement';
 import TableManagement from './pages/TableManagement';
 import OrderManagement from './pages/orderManagement';
 import StaffManagement from './pages/StaffManagement';
+import { Toaster } from 'react-hot-toast';
 
 
 function AppContent() {
@@ -42,6 +42,7 @@ function AppContent() {
           <Route path="/" element={<Profile />} />
         </Routes>
       </div>
+      <Toaster position='top-right' reverseOrder={false} />
     </div>
   );
 }
