@@ -1,123 +1,131 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import OrderCard from "../components/orderCard";
+import API_URL from "../config/api";
+
 
 export default function WaiterOrders() {
-  // Sample orders
-  const [orders, setOrders] = useState([
-    {
-      id: 1,
-      table: "T1",
-      time: "5 min ago",
-      status: "Served",
-      items: [
-        { name: "Fried Rice", qty: 2, note: "No onions" },
-        { name: "Iced Tea", qty: 1, note: "" },
-      ],
-      total: 2500,
-    },
-    {
-      id: 2,
-      table: "T3",
-      time: "12 min ago",
-      status: "Ready",
-      items: [{ name: "Chicken Curry", qty: 1, note: "Extra spicy" }],
-      total: 1500,
-    },
-    {
-      id: 3,
-      table: "T4",
-      time: "10 min ago",
-      status: "Pending",
-      items: [{ name: "Biriyani", qty: 1, note: "Extra spicy" }],
-      total: 1500,
-    },
-  ]);
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [lastSync, setLastSync] = useState(new Date());
 
-  const updateStatus = (id, newStatus) => {
-    setOrders(
-      orders.map((order) =>
-        order.id === id ? { ...order, status: newStatus } : order
-      )
-    );
+  const fetchOrders = async () => {
+    try {
+      const response = await fetch(`${API_URL}/orders`);
+      if (!response.ok) throw new Error("Failed to fetch orders");
+      const data = await response.json();
+      // The backend now returns only active orders by default, so no frontend filtering is needed.
+      setOrders(data);
+      setLastSync(new Date());
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  return (
-    <div className="p-6 bg-gray-50 min-h-screen">
-      <h1 className="text-2xl font-bold mb-6">Waiter POS – Orders</h1>
+  useEffect(() => {
+    fetchOrders();
+    const interval = setInterval(fetchOrders, 5000); // Poll every 5 seconds
+    return () => clearInterval(interval);
+  }, []);
 
-      <div className="grid md:grid-cols-2 gap-6">
-        {orders.map((order) => (
-          <div
-            key={order.id}
-            className="bg-white shadow rounded-xl p-4 border"
-          >
-            {/* Order Header */}
-            <div className="flex justify-between items-center mb-2">
-              <div>
-                <p className="font-semibold">Table: {order.table}</p>
-                <p className="text-sm text-gray-500">{order.time}</p>
-              </div>
-              <span
-                className={`px-3 py-1 text-sm rounded-full ${
-                  order.status === "Pending"
-                    ? "bg-yellow-100 text-yellow-700"
-                    : order.status === "In Preparation"
-                    ? "bg-blue-100 text-blue-700"
-                    : order.status === "Ready"
-                    ? "bg-green-100 text-green-700"
-                    : "bg-gray-200 text-gray-700"
-                }`}
-              >
-                {order.status}
-              </span>
-            </div>
+  const updateStatus = async (id, newStatus) => {
+    try {
+      // All status updates (including PAID and CANCELLED) are now PUT requests.
+      // This preserves the order for reporting instead of deleting it.
+      const response = await fetch(`${API_URL}/orders/${id}/status`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: newStatus }),
+      });
 
-            {/* Items */}
-            <div className="mb-3">
-              {order.items.map((item, i) => (
-                <div key={i} className="flex justify-between text-sm">
-                  <p>
-                    {item.qty} × {item.name}
-                    {item.note && (
-                      <span className="text-gray-500"> ({item.note})</span>
-                    )}
-                  </p>
-                </div>
-              ))}
-            </div>
+      if (!response.ok) throw new Error("Action failed");
 
-            {/* Total */}
-            <p className="font-semibold mb-3">Total: Rs. {order.total}</p>
+      // Immediate local update for better UX
+      if (newStatus === "PAID" || newStatus === "CANCELLED") {
+        // If an order is paid or cancelled, remove it from the active view.
+        setOrders(prev => prev.filter(o => o.id !== id));
+      } else {
+        // For other status changes (e.g., NEW -> SERVED), refresh the whole list
+        // to ensure correct sorting and data.
+        fetchOrders();
+      }
+    } catch (err) {
+      alert("Error: " + err.message);
+    }
+  };
 
-            {/* Actions */}
-            <div className="flex gap-2">
-              {order.status == "Ready" && (
-                <button
-                  onClick={() => updateStatus(order.id, "Served")}
-                  className="px-3 py-1 bg-green-500 text-white rounded-lg text-sm"
-                >
-                  Mark Served
-                </button>
-              )}
-              {order.status == "Pending" && (
-                <button
-                  onClick={() => updateStatus(order.id, "Cancelled")}
-                  className="px-3 py-1 bg-red-500 text-white rounded-lg text-sm"
-                >
-                  Cancel
-                </button>
-              )}
-              {order.status === "Served" && (
-                <button
-                  onClick={() => alert("Payment settled!")}
-                  className="px-3 py-1 bg-indigo-500 text-white rounded-lg text-sm"
-                >
-                  Settle Payment
-                </button>
-              )}
-            </div>
-          </div>
-        ))}
+  const statusPriority = { READY: 1, NEW: 2, PROCESSING: 3, SERVED: 4 };
+
+  const sortedOrders = [...orders].sort((a, b) => {
+    const pA = statusPriority[a.status] || 99;
+    const pB = statusPriority[b.status] || 99;
+    return pA !== pB ? pA - pB : new Date(a.createdAt) - new Date(b.createdAt);
+  });
+
+  if (loading && orders.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-slate-50">
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-600 mb-4"></div>
+        <p className="text-slate-500 font-medium">Loading active orders...</p>
       </div>
+    );
+  }
+
+  return (
+    <div className="p-8 pt-1 bg-slate-50 min-h-screen">
+      {/* Header Section */}
+      <div className="flex flex-col md:flex-row justify-between items-end mb-8 gap-4">
+        <div className="flex items-center gap-2 mb-1">
+          <span className="relative flex h-3 w-3">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-3 w-3 bg-blue-500"></span>
+          </span>
+          <h1 className="text-3xl font-black text-slate-900 tracking-tight flex items-center gap-3"> WAITER TERMINAL</h1>
+        </div>
+
+        {/* Quick Stats Summary */}
+        <div className="flex gap-3">
+          <div className="bg-green-100 border border-green-200 px-5 py-2 rounded-2xl flex flex-col items-center">
+            <span className="text-xl font-black text-green-700">
+              {orders.filter(o => o.status === "READY").length}
+            </span>
+            <span className="text-[10px] font-bold uppercase text-green-600 tracking-wider">To Serve</span>
+          </div>
+          <div className="bg-indigo-100 border border-indigo-200 px-5 py-2 rounded-2xl flex flex-col items-center">
+            <span className="text-xl font-black text-indigo-700">
+              {orders.length}
+            </span>
+            <span className="text-[10px] font-bold uppercase text-indigo-600 tracking-wider">Active</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Error State */}
+      {error && (
+        <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl flex justify-between items-center">
+          <span className="font-medium">Connection issue: {error}</span>
+          <button onClick={fetchOrders} className="text-xs font-bold underline">RETRY</button>
+        </div>
+      )}
+
+      {/* Orders Grid */}
+      {sortedOrders.length === 0 ? (
+        <div className="bg-white p-20 rounded-3xl border-2 border-dashed border-slate-200 text-center">
+          <p className="text-slate-400 text-lg font-medium">No active orders right now.</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 auto-rows-fr">
+          {sortedOrders.map((order) => (
+            <OrderCard
+              key={order.id}
+              order={order}
+              updateStatus={updateStatus}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
