@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import StaffForm from '../components/StaffForm'; // Correct import for the new StaffForm
 import API_URL from "../config/api";
+import { notify } from '../utils/notify';
+import { useConfirm } from '../hooks/useConfirm';
 
 
 export default function StaffManagement() {
@@ -9,6 +11,8 @@ export default function StaffManagement() {
   const [error, setError] = useState(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingStaff, setEditingStaff] = useState(null); 
+
+  const {confirm, ConfirmUI} = useConfirm(null);
 
   const fetchStaff = async () => {
     setLoading(true);
@@ -54,17 +58,18 @@ export default function StaffManagement() {
         throw new Error(errorData.error || `Failed to ${isEditing ? 'update' : 'create'} staff member.`);
       }
 
-      alert(`Staff member ${isEditing ? 'updated' : 'created'} successfully!`);
+      notify.success(`Staff member ${isEditing ? 'updated' : 'created'} successfully!`);
       setIsFormOpen(false);
       setEditingStaff(null); // Clear editing staff after save
       fetchStaff(); // Refresh staff list
     } catch (err) {
-      alert(err.message);
+      notify.error(err.message);
     }
   };
 
   const handleDelete = async (staffId) => {
-    if (!window.confirm('Are you sure you want to delete this staff member?')) return;
+    const ok = await confirm("Confirm Deletion", "Are you sure you want to delete this staff member?");
+    if (!ok) return;
 
     const token = localStorage.getItem('token');
     try {
@@ -75,7 +80,7 @@ export default function StaffManagement() {
 
       // Handle 204 No Content (success)
       if (response.status === 204) {
-        alert('Staff member deleted successfully!');
+        notify.success('Staff member deleted successfully!');
         fetchStaff(); // Refresh staff list
         return;
       }
@@ -86,7 +91,7 @@ export default function StaffManagement() {
         throw new Error(errorData.error || 'Failed to delete staff member.');
       }
     } catch (err) {
-      alert(err.message);
+      notify.error(err.message);
     }
   };
 
@@ -129,6 +134,7 @@ export default function StaffManagement() {
           </tbody>
         </table>
       </div>
+      <ConfirmUI />
     </div>
   );
 }

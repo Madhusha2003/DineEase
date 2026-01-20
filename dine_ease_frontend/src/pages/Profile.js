@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
+import { notify } from '../utils/notify';
 import { useNavigate } from "react-router-dom";
 import { getUserRole } from '../utils/tokenUtils';
 import API_URL from "../config/api";
@@ -55,7 +56,7 @@ const Login = () => {
       // Get role AFTER storing the token
       const role = getUserRole();
       
-      alert("Login successful!");
+      notify.success("Login successful!");
       navigateByRole(role); // Use the helper to redirect after login
 
     } catch (err) {
