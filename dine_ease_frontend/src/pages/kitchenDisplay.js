@@ -1,6 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, use } from "react";
 import KitchenCard from "../components/kitchenCard";
 import API_URL from "../config/api";
+import { notify } from "../utils/notify";
+import { useConfirm } from "../hooks/useConfirm";
 
 
 export default function KitchenDisplay() {
@@ -8,6 +10,7 @@ export default function KitchenDisplay() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [lastUpdated, setLastUpdated] = useState(new Date());
+  const {confirm, ConfirmUI} = useConfirm();
 
   const fetchOrders = async () => {
     try {
@@ -41,12 +44,13 @@ export default function KitchenDisplay() {
       if (!response.ok) throw new Error("Action failed");
       fetchOrders(); // Refresh list to ensure sorting is correct
     } catch (err) {
-      alert("Error: " + err.message);
+      notify.error("Error: " + err.message);
     }
   };
 
   const cancelOrder = async (id) => {
-    if (!window.confirm("Cancel this order?")) return;
+    const ok = await confirm("Confirm Cancel", "Are you sure you want to cancel this order?");
+    if (!ok) return;
     try {
       await fetch(`${API_URL}/orders/${id}/status`, {
         method: "PUT",
@@ -54,8 +58,9 @@ export default function KitchenDisplay() {
         body: JSON.stringify({ status: "CANCELLED" }),
       });
       setOrders((prev) => prev.filter((o) => o.id !== id));
+      notify.success("Order cancelled successfully");
     } catch (err) {
-      alert("Error: " + err.message);
+      notify.error("Error: " + err.message);
     }
   };
 
@@ -133,6 +138,7 @@ export default function KitchenDisplay() {
           ))}
         </div>
       )}
+      <ConfirmUI />
     </div>
   );
 }

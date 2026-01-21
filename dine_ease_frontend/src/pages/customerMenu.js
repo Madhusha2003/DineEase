@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import MenuCard from "../components/menuCard";
 import TableSelector from "../components/TableSelector";
 import API_URL from "../config/api";
+import { notify } from "../utils/notify";
 
 export default function CustomerMenu() {
   const [search, setSearch] = useState("");
@@ -108,22 +109,22 @@ export default function CustomerMenu() {
   const PlaceOrder = async () => {
     // Ensure a table is selected 
     if (!selectedTable) {
-      alert("Please select a table before placing an order.");
+      notify.error("Please select a table before placing an order.");
       return;
     }
     if (!customerName.trim()) {
-      alert("Please enter your name before placing an order.");
+      notify.error("Please enter your name before placing an order.");
       return;
     }
     if (numberOfGuests < 1) {
-      alert("Please enter the number of guests.");
+      notify.error("Please enter the number of guests.");
       return;
     }
 
     // Final capacity check before sending to backend
     const table = tables.find(t => t.id === parseInt(selectedTable));
     if (table && (table.occupiedSeats + numberOfGuests) > table.capacity) {
-      alert(
+      notify.error(
         `Table ${table.tableNumber} does not have enough capacity for ${numberOfGuests} guests. ` +
         `It currently has ${table.capacity - table.occupiedSeats} seat(s) available.`
       );
@@ -145,7 +146,7 @@ export default function CustomerMenu() {
 
       if (response.ok) {
         const newOrder = await response.json();
-        alert(`Order #${newOrder.id} placed successfully!`);
+        notify.success(`Order #${newOrder.id} placed successfully!`);
         setCart([]); // Clear the cart 
         setCustomerName(""); // clear the name
       } else {
@@ -153,7 +154,7 @@ export default function CustomerMenu() {
         throw new Error(errorData.error || "Failed to place order");
       }
     } catch (err) {
-      alert("Order failed: " + err.message);
+      notify.error("Order failed: " + err.message);
     }
   };
 

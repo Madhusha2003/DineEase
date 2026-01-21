@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { FaPlus, FaTrash } from 'react-icons/fa';
 import API_URL from "../config/api";
+import { notify } from '../utils/notify';
 
 
 // A modal form for adding a new table
@@ -11,7 +12,7 @@ const AddTableForm = ({ onSave, onCancel }) => {
     const handleSubmit = (e) => {
         e.preventDefault();
         if (!tableNumber.trim()) {
-            alert('Table number is required.');
+            notify.error('Table number is required.');
             return;
         }
         onSave(tableNumber.trim(), capacity); // Pass both tableNumber and capacity
@@ -104,11 +105,11 @@ export default function TableManagement() {
                 throw new Error(errorData.error || 'Failed to add table.');
             }
 
-            alert(`Table ${tableNumber} added successfully!`);
+            notify.success(`Table ${tableNumber} added successfully!`);
             setIsFormOpen(false);
             fetchData(); // Refresh data
         } catch (err) {
-            alert(err.message);
+            notify.error(err.message);
         }
     };
 
@@ -126,14 +127,14 @@ export default function TableManagement() {
             });
 
             if (response.status === 204) {
-                alert(`Table ${table.tableNumber} deleted successfully!`);
+                notify.success(`Table ${table.tableNumber} deleted successfully!`);
                 fetchData(); // Refresh data
             } else {
                 const errorData = await response.json();
                 throw new Error(errorData.error || 'Failed to delete table.');
             }
         } catch (err) {
-            alert(err.message);
+            notify.error(err.message);
         }
     };
 

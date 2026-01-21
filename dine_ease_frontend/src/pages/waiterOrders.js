@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import OrderCard from "../components/orderCard";
 import API_URL from "../config/api";
+import { notify } from "../utils/notify";
 
 
 export default function WaiterOrders() {
@@ -52,7 +53,7 @@ export default function WaiterOrders() {
         fetchOrders();
       }
     } catch (err) {
-      alert("Error: " + err.message);
+      notify.error("Error: " + err.message);
     }
   };
 
