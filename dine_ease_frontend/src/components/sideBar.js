@@ -14,62 +14,62 @@ export default function Sidebar() {
   const isLoggedIn = userRole !== null;
 
   return (
-    <div className="w-16 bg-gray-200 h-screen flex flex-col items-center py-6 space-y-8 shadow-md">
+    <div className="w-16 bg-gray-900 min-h-screen flex flex-col items-center py-6 space-y-8 shadow-md">
       {isLoggedIn ? (
         <>
           {/* Customer Menu - ADMIN, WAITER */}
           {['ADMIN', 'WAITER'].includes(userRole) && (
             <Link to="/menu" title="Menu">
-              <FaUtensils className="text-2xl cursor-pointer hover:text-orange-600" />
+              <FaUtensils className="text-2xl text-slate-200 cursor-pointer hover:text-orange-500" />
             </Link>
           )}
 
           {/* Orders - ADMIN, WAITER */}
           {['ADMIN', 'WAITER'].includes(userRole) && (
             <Link to="/orders" title="Orders">
-              <FaList className="text-2xl cursor-pointer hover:text-orange-600" />
+              <FaList className="text-2xl text-slate-200 cursor-pointer hover:text-orange-500" />
             </Link>
           )}
 
           {/* Kitchen Display - ADMIN, KITCHENSTAFF */}
           {['ADMIN', 'KITCHENSTAFF'].includes(userRole) && (
             <Link to="/kitchen" title="Kitchen Display">
-              <FaFire className="text-2xl cursor-pointer hover:text-orange-600" />
+              <FaFire className="text-2xl text-slate-200 cursor-pointer hover:text-orange-500" />
             </Link>
           )}
 
           {/* Reports - ADMIN only */}
           {userRole === 'ADMIN' && (
             <Link to="/reports" title="Reports">
-              <FaChartBar className="text-2xl cursor-pointer hover:text-orange-600" />
+              <FaChartBar className="text-2xl text-slate-200 cursor-pointer hover:text-orange-500" />
             </Link>
           )}
 
           {/* Table Management - ADMIN only */}
           {userRole === 'ADMIN' && (
             <Link to="/table_management" title="Manage Tables">
-              <FaTable className="text-2xl cursor-pointer hover:text-orange-600" />
+              <FaTable className="text-2xl text-slate-200 cursor-pointer hover:text-orange-500" />
             </Link>
           )}
 
           {/* Menu Management - ADMIN only */}
           {userRole === 'ADMIN' && (
             <Link to="/menu_management" title="Manage Menu">
-              <FaEdit className="text-2xl cursor-pointer hover:text-orange-600" />
+              <FaEdit className="text-2xl text-slate-200 cursor-pointer hover:text-orange-500" />
             </Link>
           )}
 
           {/* Order Management - ADMIN */}
           {userRole === 'ADMIN' && (
             <Link to="/order_management" title="Manage Orders">
-              <FaHistory className="text-2xl cursor-pointer hover:text-orange-600" />
+              <FaHistory className="text-2xl text-slate-200 cursor-pointer hover:text-orange-500" />
             </Link>
           )}
 
           {/* Staff Management - ADMIN only */}
           {userRole === 'ADMIN' && (
             <Link to="/staff_management" title="Manage Staff">
-              <FaUserEdit className="text-2xl cursor-pointer hover:text-orange-600" />
+              <FaUserEdit className="text-2xl text-slate-200 cursor-pointer hover:text-orange-500" />
             </Link>
           )}
 
@@ -77,14 +77,14 @@ export default function Sidebar() {
           <button
             onClick={handleLogout}
             title="Logout"
-            className="text-2xl cursor-pointer hover:text-orange-600 bg-transparent border-none"
+            className="text-2xl text-slate-200 cursor-pointer hover:text-orange-500 bg-transparent border-none"
           >
             <FaSignOutAlt />
           </button>
         </>
       ) : (
         <Link to="/profile" title="Login">
-          <FaUser className="text-2xl cursor-pointer hover:text-orange-600" />
+          <FaUser className="text-2xl text-slate-200 cursor-pointer hover:text-orange-500" />
         </Link>
       )}
     </div>

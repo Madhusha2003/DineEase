@@ -21,9 +21,9 @@ function AppContent() {
   useAutoLogout();
 
   return (
-    <div className="flex">
+    <div className="flex min-h-screen overflow-hidden">
       <Sidebar />
-      <div className="flex-1 p-6">
+      <div className="flex-1 bg-gray-100">
         <Routes>
           {/* ADMIN: all pages */}
           <Route path="/menu" element={<ProtectedRoute Component={CustomerMenu} requiredRoles={['ADMIN', 'WAITER']} />} />
