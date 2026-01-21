@@ -14,7 +14,7 @@ export default function Sidebar() {
   const isLoggedIn = userRole !== null;
 
   return (
-    <div className="w-16 bg-gray-200 h-screen flex flex-col items-center py-6 space-y-8 shadow-md">
+    <div className="w-16 bg-gray-200 min-h-screen flex flex-col items-center py-6 space-y-8 shadow-md">
       {isLoggedIn ? (
         <>
           {/* Customer Menu - ADMIN, WAITER */}

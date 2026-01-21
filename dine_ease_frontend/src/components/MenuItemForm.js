@@ -44,7 +44,7 @@ const MenuItemForm = ({ item, onSave, onCancel }) => {
             <textarea name="description" value={formData.description} onChange={handleChange} placeholder="Description" className="w-full p-2 border rounded" />
             <select name="category" value={formData.category} onChange={handleChange} className="w-full p-2 border rounded">
               <option value="food">Food</option>
-              <option value="drink">Drink</option>
+              <option value="drinks">Drink</option>
               <option value="dessert">Dessert</option>
             </select>
             <input name="image" value={formData.image} onChange={handleChange} placeholder="Image URL" className="w-full p-2 border rounded" />

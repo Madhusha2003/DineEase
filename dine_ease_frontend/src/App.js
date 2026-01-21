@@ -23,7 +23,7 @@ function AppContent() {
   return (
     <div className="flex">
       <Sidebar />
-      <div className="flex-1 p-6">
+      <div className="flex-1 p-6 bg-gray-100">
         <Routes>
           {/* ADMIN: all pages */}
           <Route path="/menu" element={<ProtectedRoute Component={CustomerMenu} requiredRoles={['ADMIN', 'WAITER']} />} />
