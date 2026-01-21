@@ -141,12 +141,18 @@ export default function CustomerMenu() {
     }
   };
 
-  if (loading) return <div className="p-10 text-center text-2xl">Loading Menu...</div>;
+  if (loading) return(
+  <div className="flex flex-col items-center justify-center min-h-screen bg-slate-50">
+    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-2"></div>
+    <p className="text-md font-medium text-slate-600 animate-pulse">
+      Loading Menu...
+    </p>
+  </div>);
   if (error) return <div className="p-10 text-center text-red-500">Error: {error}</div>;
 
   return (
     // CHANGE 1: Added overflow-x-hidden and relative to prevent scrollbars from the hidden menu
-    <div className="flex relative overflow-x-hidden min-h-screen bg-gray-100">
+    <div className="flex p-6 relative overflow-x-hidden min-h-screen bg-gray-100">
       {/* Main Content */}
       <div className="flex-1 m-2">
         {/* Header */}

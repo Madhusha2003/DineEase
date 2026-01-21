@@ -150,7 +150,7 @@ export default function TableManagement() {
     if (error) return <div className="p-8 text-center text-red-500 bg-red-50 rounded-lg">Error: {error}</div>;
 
     return (
-        <div className="p-8 bg-gray-50 min-h-screen">
+        <div className="p-12 bg-gray-50 min-h-screen">
             <div className="flex justify-between items-center mb-8">
                 <h1 className="text-3xl font-bold text-gray-800">Restaurant Overview</h1>
                 <button 

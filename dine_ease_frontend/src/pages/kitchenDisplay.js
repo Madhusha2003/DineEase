@@ -86,7 +86,7 @@ export default function KitchenDisplay() {
   }
 
   return (
-    <div className="p-8 pt-1 bg-slate-50 min-h-screen">
+    <div className="p-12 pt-6 bg-slate-50 min-h-screen">
       {/* Header Section */}
       <div className="flex flex-col md:flex-row justify-between items-end mb-10 gap-4">
         <div>

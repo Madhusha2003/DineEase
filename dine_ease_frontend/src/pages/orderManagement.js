@@ -95,7 +95,7 @@ export default function OrderManagement() {
   if (error) return <div className="p-8 text-center text-red-500">Error: {error}</div>;
 
   return (
-    <div className="p-8">
+    <div className="p-6 m-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Order History</h1>
         <div className="flex items-center gap-4">
