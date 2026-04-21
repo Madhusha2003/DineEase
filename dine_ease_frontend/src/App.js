@@ -13,6 +13,7 @@ import MenuManagement from './pages/MenuManagement';
 import TableManagement from './pages/TableManagement';
 import OrderManagement from './pages/orderManagement';
 import StaffManagement from './pages/StaffManagement';
+import RestaurantSettings from './pages/RestaurantSettings';
 import { Toaster } from 'react-hot-toast';
 
 
@@ -34,6 +35,7 @@ function AppContent() {
           <Route path="/table_management" element={<ProtectedRoute Component={TableManagement} requiredRoles={['ADMIN']} />} />
           <Route path="/order_management" element={<ProtectedRoute Component={OrderManagement} requiredRoles={['ADMIN']} />} />
           <Route path="/staff_management" element={<ProtectedRoute Component={StaffManagement} requiredRoles={['ADMIN']} />} />
+          <Route path="/settings" element={<ProtectedRoute Component={RestaurantSettings} requiredRoles={['ADMIN']} />} />
 
           {/* Profile/Login - public */}
           <Route path="/profile" element={<Profile />} />

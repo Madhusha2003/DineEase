@@ -9,8 +9,16 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
+}
+
+/// Represents the restaurant's general identity/settings
+model RestaurantProfile {
+  id      Int     @id @default(1)
+  name    String  @default("My Restaurant")
+  logoUrl String?
+  theme   String?
 }
 
 /// Represents an item on the restaurant menu.
@@ -38,7 +46,7 @@ model Table {
 /// Represents a customer's order.
 model Order {
   id     Int         @id @default(autoincrement())
-  status OrderStatus @default(NEW)
+  status String      @default("NEW") // "NEW", "PROCESSING", "READY", "SERVED", "PAID", "CANCELLED"
   total  Float
 
   createdAt DateTime @default(now())
@@ -68,29 +76,12 @@ model OrderItem {
   menuItem   MenuItem @relation(fields: [menuItemId], references: [id], onDelete: Cascade)
 }
 
-///  statuses for an order.
-enum OrderStatus {
-  NEW // "new" or "Pending"
-  PROCESSING // "process" or "In Preparation"
-  READY
-  SERVED
-  PAID
-  CANCELLED
-}
-
 /// User acounts table
 model User {
   id        Int      @id @default(autoincrement())
   name      String
   email     String   @unique
   password  String
-  role      Role
+  role      String   // "ADMIN", "WAITER", "KITCHENSTAFF"
   isActive  Boolean  @default(true)
-}
-
-/// user roles
-enum Role {
-  ADMIN
-  WAITER
-  KITCHENSTAFF
 }

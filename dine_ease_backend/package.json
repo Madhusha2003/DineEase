@@ -1,15 +1,60 @@
 {
   "name": "dineease_backend",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Desktop server dashboard for DineEase restaurant management system.",
+  "main": "main.js",
   "type": "module",
   "scripts": {
     "start": "nodemon src/server.js",
+    "electron-start": "electron .",
+    "electron-pack": "electron-builder -c.extraMetadata.main=main.js",
+    "build:exe": "npm run electron-pack",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "build": {
+    "appId": "com.dineease.desktop",
+    "productName": "DineEase_Starter",
+    "icon": "build/icon.ico",
+    "asar": false,
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "src",
+        "to": "backend/src"
+      },
+      {
+        "from": "prisma",
+        "to": "backend/prisma"
+      },
+      {
+        "from": "frontend-build",
+        "to": "frontend-build"
+      },
+      {
+        "from": "dineease.db",
+        "to": "backend/dineease.db"
+      },
+      {
+        "from": "uploads",
+        "to": "backend/uploads"
+      },
+      {
+        "from": ".env",
+        "to": "backend/.env"
+      }
+    ],
+    "win": {
+      "target": "nsis"
+    }
+  },
   "keywords": [],
-  "author": "",
+  "author": "DineEase Team",
   "license": "ISC",
   "dependencies": {
     "@prisma/adapter-mariadb": "^7.2.0",
@@ -18,11 +63,14 @@
     "cors": "^2.8.5",
     "dotenv": "^16.6.1",
     "express": "^4.22.1",
-    "jsonwebtoken": "^9.0.3"
+    "jsonwebtoken": "^9.0.3",
+    "multer": "^2.1.1"
   },
   "devDependencies": {
     "@types/node": "^25.0.9",
     "@types/pg": "^8.16.0",
+    "electron": "^41.2.1",
+    "electron-builder": "^26.8.1",
     "nodemon": "^3.1.4",
     "prisma": "^5.22.0"
   }

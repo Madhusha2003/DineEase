@@ -1,4 +1,4 @@
-import { FaUtensils, FaList, FaChartBar, FaUser, FaFire, FaSignOutAlt, FaEdit, FaTable, FaUserEdit, FaHistory } from "react-icons/fa";
+import { FaUtensils, FaList, FaChartBar, FaUser, FaFire, FaSignOutAlt, FaEdit, FaTable, FaUserEdit, FaHistory, FaCog } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
 import { getUserRole } from "../utils/tokenUtils";
 
@@ -70,6 +70,13 @@ export default function Sidebar() {
           {userRole === 'ADMIN' && (
             <Link to="/staff_management" title="Manage Staff">
               <FaUserEdit className="text-2xl text-slate-200 cursor-pointer hover:text-orange-500" />
+            </Link>
+          )}
+
+          {/* Settings - ADMIN only */}
+          {userRole === 'ADMIN' && (
+            <Link to="/settings" title="Settings">
+              <FaCog className="text-2xl text-slate-200 cursor-pointer hover:text-orange-500" />
             </Link>
           )}
 

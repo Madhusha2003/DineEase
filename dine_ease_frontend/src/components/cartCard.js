@@ -13,6 +13,7 @@ export default function CartCard({
   onDecreaseQty,
   onRemoveFromCart,
   onPlaceOrder,
+  clearCart
 }) {
   const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
   const totalPrice = cart.reduce((sum, item) => sum + item.price * item.quantity, 0).toFixed(2);
@@ -102,6 +103,7 @@ export default function CartCard({
             <button className="w-full mt-6 bg-orange-600 text-white font-bold py-3 rounded-lg hover:bg-orange-700 transition-all duration-300 shadow-md hover:shadow-lg" onClick={onPlaceOrder}>
               Place Order
             </button>
+            <button onClick={clearCart}>Clear cart</button>
           </div>
         </>
       )}
