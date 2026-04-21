@@ -4,6 +4,7 @@ import { fileURLToPath } from 'url';
 import { fork } from 'child_process';
 import os from 'os';
 import fs from 'fs';
+import QRCode from 'qrcode';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -11,8 +12,10 @@ const __dirname = path.dirname(__filename);
 let mainWindow;
 let serverProcess;
 
+// 🔥 Get local IPv4
 function getLocalIp() {
   const interfaces = os.networkInterfaces();
+
   for (const name of Object.keys(interfaces)) {
     for (const iface of interfaces[name]) {
       if (iface.family === 'IPv4' && !iface.internal) {
@@ -20,13 +23,15 @@ function getLocalIp() {
       }
     }
   }
+
   return 'localhost';
 }
 
-function createWindow() {
+// 🧠 Create Electron Window
+async function createWindow() {
   mainWindow = new BrowserWindow({
-    width: 600,
-    height: 400,
+    width: 650,
+    height: 550,
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
@@ -35,22 +40,45 @@ function createWindow() {
   });
 
   const ip = getLocalIp();
+  const url = `http://${ip}:3001`;
+
+  // 🔥 Generate QR Code
+  const qrDataUrl = await QRCode.toDataURL(url);
 
   mainWindow.loadURL(
     `data:text/html;charset=utf-8,${encodeURIComponent(`
       <html>
-      <body style="font-family:sans-serif;text-align:center;padding:40px">
-        <h2>Server Running</h2>
-        <p>http://${ip}:3001</p>
-        <button onclick="require('electron').shell.openExternal('http://localhost:3001')">
-          Open
-        </button>
-      </body>
+        <head>
+          <title>DineEase Server</title>
+        </head>
+        <body style="font-family: Arial; text-align: center; padding: 40px; background: #f4f4f4">
+
+          <h2>🍽️ DineEase Server Running</h2>
+
+          <p style="font-size:18px"><b>${url}</b></p>
+
+          <img src="${qrDataUrl}" style="width:220px;height:220px;margin:20px;border-radius:12px"/>
+
+          <br/>
+
+          <button 
+            style="padding:10px 20px;font-size:16px;cursor:pointer"
+            onclick="require('electron').shell.openExternal('${url}')"
+          >
+            Open Server
+          </button>
+
+          <p style="margin-top:20px;color:gray">
+            Scan QR to connect from mobile 📱
+          </p>
+
+        </body>
       </html>
     `)}`
   );
 }
 
+// 🚀 App start
 app.whenReady().then(() => {
   const resourcesPath = app.isPackaged ? process.resourcesPath : __dirname;
   const userDataPath = app.getPath('userData');
@@ -59,21 +87,17 @@ app.whenReady().then(() => {
     ? path.join(resourcesPath, 'backend/src/server.js')
     : path.join(__dirname, 'src/server.js');
 
-  // Determine paths based on environment
   let dbPath;
   let uploadsPath;
 
   if (app.isPackaged) {
-    // In production, save to AppData (e.g., %AppData%/DineEase/...)
     dbPath = path.join(userDataPath, 'dineease.db');
     uploadsPath = path.join(userDataPath, 'uploads');
 
-    // Create uploads folder if missing
     if (!fs.existsSync(uploadsPath)) {
       fs.mkdirSync(uploadsPath, { recursive: true });
     }
 
-    // Copy template database if it doesn't exist in AppData yet
     if (!fs.existsSync(dbPath)) {
       const templateDbPath = path.join(resourcesPath, 'backend/dineease.db');
       if (fs.existsSync(templateDbPath)) {
@@ -81,7 +105,6 @@ app.whenReady().then(() => {
       }
     }
   } else {
-    // In development, keep it local to the folder
     dbPath = path.join(__dirname, 'dineease.db');
     uploadsPath = path.join(__dirname, 'uploads');
   }
@@ -90,24 +113,31 @@ app.whenReady().then(() => {
   console.log("DB Path:", dbPath);
   console.log("Uploads Path:", uploadsPath);
 
-  // 🔥 STABLE METHOD
+  // 🔥 Start backend
   serverProcess = fork(backendPath, {
     env: {
       ...process.env,
       NODE_ENV: 'production',
       RESOURCES_PATH: resourcesPath,
       DATABASE_URL: `file:${dbPath}`,
-      UPLOADS_PATH: uploadsPath
+      UPLOADS_PATH: uploadsPath,
     },
-    stdio: ['inherit', 'pipe', 'pipe', 'ipc']
+    stdio: ['inherit', 'pipe', 'pipe', 'ipc'],
   });
 
-  serverProcess.stdout.on('data', (data) => console.log(`[Server]: ${data}`));
-  serverProcess.stderr.on('data', (data) => console.error(`[Server Error]: ${data}`));
+  serverProcess.stdout.on('data', (data) => {
+    console.log(`[Server]: ${data}`);
+  });
 
+  serverProcess.stderr.on('data', (data) => {
+    console.error(`[Server Error]: ${data}`);
+  });
+
+  // 🧠 Create UI
   createWindow();
 });
 
+// 🛑 Cleanup
 app.on('window-all-closed', () => {
   if (serverProcess) serverProcess.kill();
   if (process.platform !== 'darwin') app.quit();
