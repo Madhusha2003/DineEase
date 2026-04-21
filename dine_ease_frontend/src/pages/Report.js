@@ -223,7 +223,7 @@ export default function ReportsPage() {
   }
 
   return (
-    <div className="p-6 sm:p-6 bg-gray-100 min-h-screen">
+    <div className="p-3 md:p-12 bg-gray-100 min-h-screen">
       {/* Header / Filters */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
         <h1 className="text-3xl font-bold text-gray-800">Reports Dashboard</h1>

@@ -159,7 +159,7 @@ export default function CustomerMenu() {
   if (error) return <div className="p-10 text-center text-red-500">Error: {error}</div>;
 
   return (
-    <div className="flex p-6 relative overflow-x-hidden min-h-screen bg-gradient-to-br from-gray-50 to-gray-200">
+    <div className="flex p-3 md:p-6 relative overflow-x-hidden min-h-screen bg-gradient-to-br from-gray-50 to-gray-200">
       {/* Main Content */}
       <div className="flex-1 m-2">
         {/* Header - Glassmorphism style */}
@@ -259,7 +259,7 @@ export default function CustomerMenu() {
 
       {/* --- SLIDING CHECKOUT DRAWER --- */}
       <div
-        className={`fixed top-0 right-0 h-full w-full sm:w-[450px] bg-white/95 backdrop-blur-xl z-[60] shadow-[-10px_0_30px_rgba(0,0,0,0.1)] transition-all duration-500 ease-in-out transform border-l border-white/50
+        className={`fixed top-0 right-0 h-full w-full sm:w-[450px] bg-white z-[60] shadow-[-10px_0_30px_rgba(0,0,0,0.1)] transition-all duration-500 ease-in-out transform border-l border-gray-200 flex flex-col
         ${isCartOpen ? "translate-x-0 visible" : "translate-x-full invisible"}`}
       >
         <button

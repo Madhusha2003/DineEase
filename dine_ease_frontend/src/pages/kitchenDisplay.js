@@ -1,4 +1,4 @@
-import { useState, useEffect, use } from "react";
+import { useState, useEffect } from "react";
 import KitchenCard from "../components/kitchenCard";
 import API_URL from "../config/api";
 import { notify } from "../utils/notify";

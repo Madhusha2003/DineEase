@@ -19,7 +19,7 @@ export default function CartCard({
   const totalPrice = cart.reduce((sum, item) => sum + item.price * item.quantity, 0).toFixed(2);
 
   return (
-    <div className="w-full max-w-sm bg-white rounded-3xl shadow-xl border border-orange-600 flex flex-col p-5 overflow-hidden h-full sticky top-6">
+    <div className="w-full bg-white flex flex-col p-5 overflow-hidden h-full">
       {/* Header with Color Accent */}
       <div className="bg-orange-600 p-6 rounded-xl">
         <div className="flex justify-between items-center">

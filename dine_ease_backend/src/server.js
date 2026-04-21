@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs';
+import os from 'os';
 
 // import routes
 import authRoutes from './routes/authRoutes.js';
@@ -22,7 +23,7 @@ const isPackaged = process.env.NODE_ENV === 'production' || !!process.versions.e
 const resourcesPath = process.env.RESOURCES_PATH || (isPackaged ? process.resourcesPath : path.join(__dirname, '..'));
 
 // Load environment variables from the correct path
-const envPath = isPackaged 
+const envPath = isPackaged
   ? path.join(resourcesPath, 'backend', '.env')
   : path.join(__dirname, '..', '.env');
 
@@ -77,7 +78,25 @@ app.get('*', (req, res) => {
   }
 });
 
-// start server
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
+function getLocalIP() {
+  const interfaces = os.networkInterfaces();
+
+  for (const name of Object.keys(interfaces)) {
+    for (const net of interfaces[name]) {
+      if (net.family === 'IPv4' && !net.internal) {
+        return net.address;
+      }
+    }
+  }
+
+  return 'localhost';
+}
+
+const localIP = getLocalIP();
+
+// Start server
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Server running on:`);
+  console.log(`- Local:   http://localhost:${PORT}`);
+  console.log(`- Network: http://${localIP}:${PORT}`);
 });

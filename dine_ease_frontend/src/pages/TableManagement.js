@@ -149,8 +149,8 @@ export default function TableManagement() {
     if (loading) return <div className="p-8 text-center text-lg font-medium">Loading Restaurant View...</div>;
     if (error) return <div className="p-8 text-center text-red-500 bg-red-50 rounded-lg">Error: {error}</div>;
 
-    return (
-        <div className="p-12 bg-gray-50 min-h-screen">
+  return (
+    <div className="p-3 md:p-12 bg-gray-50 min-h-screen">
             <div className="flex justify-between items-center mb-8">
                 <h1 className="text-3xl font-bold text-gray-800">Restaurant Overview</h1>
                 <button 

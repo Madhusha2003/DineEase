@@ -85,7 +85,7 @@ export default function MenuManagement() {
   if (error) return <div className="p-8 text-center text-red-500">Error: {error}</div>;
 
   return (
-    <div className="p-6 m-6">
+    <div className="p-3 md:p-12 min-h-screen">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Menu Management</h1>
         <button onClick={() => setIsFormOpen(true)} className="px-4 py-2 bg-green-500 text-white rounded-lg shadow hover:bg-green-600">Add New Item</button>
