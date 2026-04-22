@@ -84,7 +84,7 @@ app.whenReady().then(() => {
   const userDataPath = app.getPath('userData');
 
   const backendPath = app.isPackaged
-    ? path.join(resourcesPath, 'backend/src/server.js')
+    ? path.join(resourcesPath, 'app/src/server.js')
     : path.join(__dirname, 'src/server.js');
 
   let dbPath;
@@ -99,7 +99,7 @@ app.whenReady().then(() => {
     }
 
     if (!fs.existsSync(dbPath)) {
-      const templateDbPath = path.join(resourcesPath, 'backend/dineease.db');
+      const templateDbPath = path.join(resourcesPath, 'app/dineease.db');
       if (fs.existsSync(templateDbPath)) {
         fs.copyFileSync(templateDbPath, dbPath);
       }
@@ -115,6 +115,9 @@ app.whenReady().then(() => {
 
   // 🔥 Start backend
   serverProcess = fork(backendPath, {
+    cwd: app.isPackaged
+      ? path.join(resourcesPath, 'app')
+      : __dirname,
     env: {
       ...process.env,
       NODE_ENV: 'production',

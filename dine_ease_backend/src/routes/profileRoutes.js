@@ -9,7 +9,9 @@ const prisma = new PrismaClient();
 // Multer setup for logo storage
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, 'uploads/');
+    // Use UPLOADS_PATH if set (by main.js in production), fallback to local 'uploads/'
+    const uploadPath = process.env.UPLOADS_PATH || 'uploads/';
+    cb(null, uploadPath);
   },
   filename: (req, file, cb) => {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
@@ -17,7 +19,7 @@ const storage = multer.diskStorage({
   },
 });
 
-const upload = multer({ 
+const upload = multer({
   storage,
   limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
   fileFilter: (req, file, cb) => {
@@ -62,11 +64,11 @@ router.post('/logo', upload.single('logo'), async (req, res) => {
     }
 
     const logoUrl = `/uploads/${req.file.filename}`;
-    
+
     // We update the DB immediately or let the PUT / handle it?
     // User requested "add url or file not both, handle always only one selection"
     // So if they upload a file, we should probably update the DB with this URL.
-    
+
     const profile = await prisma.restaurantProfile.upsert({
       where: { id: 1 },
       update: { logoUrl },

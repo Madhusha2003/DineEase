@@ -25,12 +25,16 @@
     ],
     "extraResources": [
       {
+        "from": "node_modules/.prisma",
+        "to": "app/node_modules/.prisma"
+      },
+      {
         "from": "src",
-        "to": "backend/src"
+        "to": "app/src"
       },
       {
         "from": "prisma",
-        "to": "backend/prisma"
+        "to": "app/prisma"
       },
       {
         "from": "frontend-build",
@@ -38,15 +42,15 @@
       },
       {
         "from": "dineease.db",
-        "to": "backend/dineease.db"
+        "to": "app/dineease.db"
       },
       {
         "from": "uploads",
-        "to": "backend/uploads"
+        "to": "app/uploads"
       },
       {
         "from": ".env",
-        "to": "backend/.env"
+        "to": "app/.env"
       }
     ],
     "win": {

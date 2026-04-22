@@ -24,7 +24,7 @@ const resourcesPath = process.env.RESOURCES_PATH || (isPackaged ? process.resour
 
 // Load environment variables from the correct path
 const envPath = isPackaged
-  ? path.join(resourcesPath, 'backend', '.env')
+  ? path.join(resourcesPath, 'app', '.env')
   : path.join(__dirname, '..', '.env');
 
 if (fs.existsSync(envPath)) {
@@ -55,7 +55,7 @@ app.use('/api/restaurant', profileRoutes);
 
 // uploads
 const uploadsPath = process.env.UPLOADS_PATH || (isPackaged
-  ? path.join(resourcesPath, 'backend/uploads')
+  ? path.join(resourcesPath, 'app/uploads')
   : path.join(__dirname, '../uploads'));
 
 app.use('/uploads', express.static(uploadsPath));
@@ -76,6 +76,14 @@ app.get('*', (req, res) => {
   } else {
     res.status(404).send('Frontend build not found.');
   }
+});
+
+// Global Error Handler
+app.use((err, req, res, next) => {
+  console.error('[Global Error]:', err.stack);
+  res.status(err.status || 500).json({
+    error: err.message || 'An internal server error occurred.',
+  });
 });
 
 function getLocalIP() {

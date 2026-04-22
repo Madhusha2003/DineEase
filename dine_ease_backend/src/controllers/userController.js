@@ -1,7 +1,7 @@
 import bcrypt from 'bcryptjs';
-import pkg from '@prisma/client';
-const { Role } = pkg;
 import { prisma } from '../lib/prisma.js';
+
+const VALID_ROLES = ['ADMIN', 'WAITER', 'KITCHENSTAFF'];
 
 // @desc    Register a new user
 // @route   POST /api/users
@@ -13,7 +13,7 @@ export const createUser = async (req, res) => {
     return res.status(400).json({ error: 'Please provide all required fields: name, email, password, role.' });
   }
 
-  if (!Object.values(Role).includes(role)) {
+  if (!VALID_ROLES.includes(role)) {
     return res.status(400).json({ error: 'Invalid role specified.' });
   }
 
@@ -79,6 +79,10 @@ export const updateUser = async (req, res) => {
 
     if (!user) {
       return res.status(404).json({ error: 'User not found.' });
+    }
+
+    if (role && !VALID_ROLES.includes(role)) {
+      return res.status(400).json({ error: 'Invalid role specified.' });
     }
 
     const updateData = {
